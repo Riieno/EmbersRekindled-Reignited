@@ -34,6 +34,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import com.rekindled.embers.compat.legacy.capabilities.Capability;
@@ -135,10 +136,10 @@ public class MixerCentrifugeBottomBlockEntity extends BlockEntity implements IMe
 	}
 
 	public static void serverTick(Level level, BlockPos pos, BlockState state, MixerCentrifugeBottomBlockEntity blockEntity) {
-		MixerCentrifugeTopBlockEntity top = (MixerCentrifugeTopBlockEntity) level.getBlockEntity(pos.above());
+		BlockEntity topEntity = level.getBlockEntity(pos.above());
 		boolean wasWorking = blockEntity.isWorking;
 		blockEntity.isWorking = false;
-		if (top != null) {
+		if (topEntity instanceof MixerCentrifugeTopBlockEntity top) {
 			blockEntity.upgrades = UpgradeUtil.getUpgrades(level, pos.above(), Direction.values());
 			UpgradeUtil.verifyUpgrades(blockEntity, blockEntity.upgrades);
 			if (UpgradeUtil.doTick(blockEntity, blockEntity.upgrades))
@@ -154,11 +155,10 @@ public class MixerCentrifugeBottomBlockEntity extends BlockEntity implements IMe
 			if (top.capability.getEmber() >= emberCost && blockEntity.cachedRecipe != null) {
 				boolean cancel = UpgradeUtil.doWork(blockEntity, blockEntity.upgrades);
 				if (!cancel) {
-					IFluidHandler tank = com.rekindled.embers.util.CapabilityCompat.getCapability(top, ForgeCapabilities.FLUID_HANDLER).orElse(null);
+					FluidTank tank = top.getTank();
 					FluidStack output = blockEntity.cachedRecipe.getOutput(context);
 					output = UpgradeUtil.transformOutput(blockEntity, output, blockEntity.upgrades);
-					int amount = tank.fill(output, FluidAction.SIMULATE);
-					if (amount != 0) {
+					if (output != null && !output.isEmpty() && tank.fill(output, FluidAction.SIMULATE) >= output.getAmount()) {
 						UpgradeUtil.throwEvent(blockEntity, new MachineRecipeEvent.Success<>(blockEntity, blockEntity.cachedRecipe), blockEntity.upgrades);
 						blockEntity.isWorking = true;
 						tank.fill(output, FluidAction.EXECUTE);
@@ -234,8 +234,10 @@ public class MixerCentrifugeBottomBlockEntity extends BlockEntity implements IMe
 	@Override
 	public void setChanged() {
 		super.setChanged();
-		if (level instanceof ServerLevel)
-			((ServerLevel) level).getChunkSource().blockChanged(worldPosition);
+		if (level instanceof ServerLevel serverLevel) {
+			serverLevel.getChunkSource().blockChanged(worldPosition);
+			level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL);
+		}
 	}
 
 	@Override
