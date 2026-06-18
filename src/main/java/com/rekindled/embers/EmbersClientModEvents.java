@@ -254,6 +254,7 @@ public final class EmbersClientModEvents {
 	static void registerAdditionalModels(ModelEvent.RegisterAdditional event) {
 		event.register(ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(Embers.MODID, "block/atmospheric_bellows_top")));
 		event.register(ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(Embers.MODID, "block/atmospheric_bellows_leather")));
+		event.register(ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(Embers.MODID, "block/stamper_arm")));
 		event.register(ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(Embers.MODID, "block/inferno_forge_hatch")));
 	}
 

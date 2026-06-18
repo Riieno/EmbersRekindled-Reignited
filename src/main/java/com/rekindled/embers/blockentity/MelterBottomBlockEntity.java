@@ -20,6 +20,7 @@ import com.rekindled.embers.particle.SmokeParticleOptions;
 import com.rekindled.embers.particle.SparkParticleOptions;
 import com.rekindled.embers.power.DefaultEmberCapability;
 import com.rekindled.embers.recipe.IMeltingRecipe;
+import com.rekindled.embers.upgrade.GeologicSeparatorUpgrade;
 import com.rekindled.embers.util.EmbersColors;
 import com.rekindled.embers.util.Misc;
 import com.rekindled.embers.util.sound.ISoundController;
@@ -144,8 +145,13 @@ public class MelterBottomBlockEntity extends BlockEntity implements ISoundContro
 							FluidStack output = blockEntity.cachedRecipe.getOutput(wrapper);
 							FluidTank tank = top.getTank();
 							output = UpgradeUtil.transformOutput(blockEntity, output, blockEntity.upgrades);
-							if (output != null && tank.fill(output, FluidAction.SIMULATE) >= output.getAmount()) {
-								tank.fill(output, FluidAction.EXECUTE);
+							boolean separatorCanAcceptOutput = output != null && GeologicSeparatorUpgrade.fillOutput(blockEntity.upgrades, output, FluidAction.SIMULATE) >= output.getAmount();
+							boolean tankCanAcceptOutput = output != null && !separatorCanAcceptOutput && tank.fill(output, FluidAction.SIMULATE) >= output.getAmount();
+							if (separatorCanAcceptOutput || tankCanAcceptOutput) {
+								if (separatorCanAcceptOutput)
+									GeologicSeparatorUpgrade.fillOutput(blockEntity.upgrades, output, FluidAction.EXECUTE);
+								else
+									tank.fill(output, FluidAction.EXECUTE);
 								//the recipe is responsible for taking items from the inventory
 								blockEntity.cachedRecipe.process(wrapper);
 								top.setChanged();

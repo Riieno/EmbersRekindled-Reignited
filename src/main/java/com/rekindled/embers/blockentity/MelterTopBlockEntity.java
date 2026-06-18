@@ -8,6 +8,7 @@ import org.joml.Vector3f;
 import com.rekindled.embers.ConfigManager;
 import com.rekindled.embers.Embers;
 import com.rekindled.embers.RegistryManager;
+import com.rekindled.embers.api.capabilities.EmbersCapabilities;
 import com.rekindled.embers.api.tile.IExtraCapabilityInformation;
 import com.rekindled.embers.particle.VaporParticleOptions;
 import com.rekindled.embers.util.Misc;
@@ -33,6 +34,7 @@ import com.rekindled.embers.compat.legacy.capabilities.Capability;
 import com.rekindled.embers.compat.legacy.capabilities.ForgeCapabilities;
 import com.rekindled.embers.compat.legacy.LazyOptional;
 import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemStackHandler;
@@ -51,6 +53,43 @@ public class MelterTopBlockEntity extends OpenTankBlockEntity implements IExtraC
 		}
 	};
 	public LazyOptional<IItemHandler> holder = LazyOptional.of(() -> inventory);
+	private final IFluidHandler outputHandler = new IFluidHandler() {
+		@Override
+		public int getTanks() {
+			return tank.getTanks();
+		}
+
+		@Override
+		public FluidStack getFluidInTank(int tank) {
+			return MelterTopBlockEntity.this.tank.getFluidInTank(tank);
+		}
+
+		@Override
+		public int getTankCapacity(int tank) {
+			return MelterTopBlockEntity.this.tank.getTankCapacity(tank);
+		}
+
+		@Override
+		public boolean isFluidValid(int tank, FluidStack stack) {
+			return false;
+		}
+
+		@Override
+		public int fill(FluidStack resource, FluidAction action) {
+			return 0;
+		}
+
+		@Override
+		public FluidStack drain(FluidStack resource, FluidAction action) {
+			return MelterTopBlockEntity.this.tank.drain(resource, action);
+		}
+
+		@Override
+		public FluidStack drain(int maxDrain, FluidAction action) {
+			return MelterTopBlockEntity.this.tank.drain(maxDrain, action);
+		}
+	};
+	private final LazyOptional<IFluidHandler> fluidOutputHolder = LazyOptional.of(() -> outputHandler);
 
 	public MelterTopBlockEntity(BlockPos pPos, BlockState pBlockState) {
 		super(RegistryManager.MELTER_TOP_ENTITY.get(), pPos, pBlockState);
@@ -141,15 +180,22 @@ public class MelterTopBlockEntity extends OpenTankBlockEntity implements IExtraC
 	}
 
 	public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
+		if (!this.isRemoved() && cap == ForgeCapabilities.FLUID_HANDLER) {
+			return ForgeCapabilities.FLUID_HANDLER.orEmpty(cap, fluidOutputHolder);
+		}
 		if (!this.isRemoved() && cap == ForgeCapabilities.ITEM_HANDLER) {
 			return ForgeCapabilities.ITEM_HANDLER.orEmpty(cap, holder);
 		}
-		return LazyOptional.empty();
+		if (!this.isRemoved() && cap == EmbersCapabilities.EMBER_CAPABILITY && level != null && level.getBlockEntity(worldPosition.below()) instanceof MelterBottomBlockEntity bottom) {
+			return bottom.getCapability(cap, side);
+		}
+		return super.getCapability(cap, side);
 	}
 
 	public void invalidateCaps() {
-		
+		super.invalidateCaps();
 		holder.invalidate();
+		fluidOutputHolder.invalidate();
 	}
 
 	@SuppressWarnings("resource")
@@ -167,11 +213,13 @@ public class MelterTopBlockEntity extends OpenTankBlockEntity implements IExtraC
 
 	@Override
 	public boolean hasCapabilityDescription(Capability<?> capability) {
-		return capability == ForgeCapabilities.FLUID_HANDLER || capability == ForgeCapabilities.ITEM_HANDLER;
+		return capability == EmbersCapabilities.EMBER_CAPABILITY || capability == ForgeCapabilities.FLUID_HANDLER || capability == ForgeCapabilities.ITEM_HANDLER;
 	}
 
 	@Override
 	public void addCapabilityDescription(List<Component> strings, Capability<?> capability, Direction facing) {
+		if (capability == EmbersCapabilities.EMBER_CAPABILITY)
+			strings.add(IExtraCapabilityInformation.formatCapability(EnumIOType.INPUT, Embers.MODID + ".tooltip.goggles.ember", null));
 		if (capability == ForgeCapabilities.ITEM_HANDLER)
 			strings.add(IExtraCapabilityInformation.formatCapability(EnumIOType.INPUT, Embers.MODID + ".tooltip.goggles.item", null));
 		if (capability == ForgeCapabilities.FLUID_HANDLER)

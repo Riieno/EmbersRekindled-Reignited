@@ -34,11 +34,46 @@ public class GeologicSeparatorUpgrade extends DefaultUpgradeProvider {
 			if (recipe instanceof MeltingRecipe) {
 				FluidStack bonus = ((MeltingRecipe) recipe).getBonus();
 				if (!bonus.isEmpty() && this.tile instanceof GeologicSeparatorBlockEntity) {
-					IFluidHandler fluidHandler = com.rekindled.embers.util.CapabilityCompat.getCapability(tile, ForgeCapabilities.FLUID_HANDLER, null).orElse(null);
-					if (fluidHandler != null)
-						fluidHandler.fill(bonus.copy(), FluidAction.EXECUTE);
+					if (findTarget(upgrades, bonus) != this)
+						return;
+					fill(this, bonus, FluidAction.EXECUTE);
 				}
 			}
 		}
+	}
+
+	public static int fillOutput(List<UpgradeContext> upgrades, FluidStack output, FluidAction action) {
+		GeologicSeparatorUpgrade target = findTarget(upgrades, output);
+		if (target == null)
+			return 0;
+		return fill(target, output, action);
+	}
+
+	private static GeologicSeparatorUpgrade findTarget(List<UpgradeContext> upgrades, FluidStack stack) {
+		GeologicSeparatorUpgrade emptyTarget = null;
+		for (UpgradeContext context : upgrades) {
+			if (context.distance() > 0 || !(context.upgrade() instanceof GeologicSeparatorUpgrade separator))
+				continue;
+			IFluidHandler fluidHandler = getFluidHandler(separator);
+			if (fluidHandler == null || fluidHandler.fill(stack.copy(), FluidAction.SIMULATE) < stack.getAmount())
+				continue;
+			FluidStack contained = fluidHandler.getFluidInTank(0);
+			if (!contained.isEmpty() && FluidStack.isSameFluidSameComponents(contained, stack))
+				return separator;
+			if (contained.isEmpty() && emptyTarget == null)
+				emptyTarget = separator;
+		}
+		return emptyTarget;
+	}
+
+	private static int fill(GeologicSeparatorUpgrade separator, FluidStack stack, FluidAction action) {
+		IFluidHandler fluidHandler = getFluidHandler(separator);
+		if (fluidHandler == null)
+			return 0;
+		return fluidHandler.fill(stack.copy(), action);
+	}
+
+	private static IFluidHandler getFluidHandler(GeologicSeparatorUpgrade separator) {
+		return com.rekindled.embers.util.CapabilityCompat.getCapability(separator.tile, ForgeCapabilities.FLUID_HANDLER, null).orElse(null);
 	}
 }

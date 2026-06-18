@@ -9,6 +9,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -60,8 +61,10 @@ public abstract class OpenTankBlockEntity extends FluidHandlerBlockEntity {
 	@Override
 	public void setChanged() {
 		super.setChanged();
-		if (level instanceof ServerLevel)
-			((ServerLevel) level).getChunkSource().blockChanged(worldPosition);
+		if (level instanceof ServerLevel serverLevel) {
+			serverLevel.getChunkSource().blockChanged(worldPosition);
+			level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL);
+		}
 	}
 
 	public void setEscapedFluid(FluidStack stack) {

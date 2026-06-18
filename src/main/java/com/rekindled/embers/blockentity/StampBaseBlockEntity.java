@@ -122,11 +122,11 @@ public class StampBaseBlockEntity extends OpenTankBlockEntity implements IExtraC
 		if (!this.isRemoved() && cap == ForgeCapabilities.ITEM_HANDLER) {
 			return ForgeCapabilities.ITEM_HANDLER.orEmpty(cap, holder);
 		}
-		return LazyOptional.empty();
+		return super.getCapability(cap, side);
 	}
 
 	public void invalidateCaps() {
-		
+		super.invalidateCaps();
 		holder.invalidate();
 	}
 

@@ -62,9 +62,10 @@ public class GeologicSeparatorBlockEntity extends OpenTankBlockEntity implements
 		if (!this.isRemoved() && cap == EmbersCapabilities.UPGRADE_PROVIDER_CAPABILITY && (side == null || level.getBlockState(worldPosition).getValue(BlockStateProperties.HORIZONTAL_FACING) == side)) {
 			return upgrade.getCapability(cap, side);
 		}
-		if (side == Direction.UP)
+		if (cap == ForgeCapabilities.FLUID_HANDLER && side == Direction.UP) {
 			return LazyOptional.empty();
-		return LazyOptional.empty();
+		}
+		return super.getCapability(cap, side);
 	}
 
 	public int getCapacity(){
