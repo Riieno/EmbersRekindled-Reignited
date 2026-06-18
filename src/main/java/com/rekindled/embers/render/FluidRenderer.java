@@ -61,6 +61,10 @@ public class FluidRenderer {
 		return value < 0 ? (value + 1) : value;
 	}
 
+	private static float shrinkUV(float value, float center, float shrink) {
+		return value + (center - value) * shrink;
+	}
+
 	/**
 	 * Adds a quad to the renderer
 	 * @param renderer    Renderer instnace
@@ -130,19 +134,27 @@ public class FluidRenderer {
 		v1 = boundUV(v1, reverse);
 		v2 = boundUV(v2, !reverse);
 
+		float uvShrink = sprite.uvShrinkRatio();
+		float uCenter = (u1 + u2) * 0.5f;
+		float vCenter = (v1 + v2) * 0.5f;
+		u1 = shrinkUV(u1, uCenter, uvShrink);
+		u2 = shrinkUV(u2, uCenter, uvShrink);
+		v1 = shrinkUV(v1, vCenter, uvShrink);
+		v2 = shrinkUV(v2, vCenter, uvShrink);
+
 		// if rotating by 90 or 270, swap U and V
 		float minU, maxU, minV, maxV;
-		float size = flowing ? 8 : 16;
+		float uvScale = flowing ? 0.5f : 1.0f;
 		if ((rotation % 180) == 90) {
-			minU = sprite.getU(v1 * size);
-			maxU = sprite.getU(v2 * size);
-			minV = sprite.getV(u1 * size);
-			maxV = sprite.getV(u2 * size);
+			minU = sprite.getU(v1 * uvScale);
+			maxU = sprite.getU(v2 * uvScale);
+			minV = sprite.getV(u1 * uvScale);
+			maxV = sprite.getV(u2 * uvScale);
 		} else {
-			minU = sprite.getU(u1 * size);
-			maxU = sprite.getU(u2 * size);
-			minV = sprite.getV(v1 * size);
-			maxV = sprite.getV(v2 * size);
+			minU = sprite.getU(u1 * uvScale);
+			maxU = sprite.getU(u2 * uvScale);
+			minV = sprite.getV(v1 * uvScale);
+			maxV = sprite.getV(v2 * uvScale);
 		}
 		// based on rotation, put coords into place
 		float u3, u4, v3, v4;
