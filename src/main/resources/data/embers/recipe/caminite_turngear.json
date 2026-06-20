@@ -1,0 +1,23 @@
+{
+  "neoforge:conditions": [
+    { "type": "neoforge:mod_loaded", "modid": "create" },
+    { "type": "neoforge:mod_loaded", "modid": "aeronautics" }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "DPD",
+    "CGC",
+    "DAD"
+  ],
+  "key": {
+    "A": { "item": "create:andesite_alloy" },
+    "C": { "item": "embers:caminite_plate" },
+    "D": { "tag": "c:plates/dawnstone" },
+    "G": { "item": "aeronautics:gyroscopic_propeller_bearing" },
+    "P": { "item": "create:precision_mechanism" }
+  },
+  "result": {
+    "id": "embers:caminite_turngear"
+  }
+}

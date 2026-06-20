@@ -28,6 +28,7 @@ import com.rekindled.embers.api.tile.IEmberInputHint;
 import com.rekindled.embers.api.tile.IExtraCapabilityInformation;
 import com.rekindled.embers.api.tile.IUpgradeable;
 import com.rekindled.embers.api.upgrades.IUpgradeProxy;
+import com.rekindled.embers.blockentity.BeamCannonBlockEntity;
 import com.rekindled.embers.blockentity.MechanicalCoreBlockEntity.BlockEntityDirection;
 import com.rekindled.embers.blockentity.render.AutomaticHammerBlockEntityRenderer;
 import com.rekindled.embers.blockentity.render.EmberBoreBlockEntityRenderer;
@@ -346,6 +347,12 @@ public class EmbersClientEvents {	public static int ticks = 0;
 			target = emitter.getTarget(side);
 			if (target == null)
 				return null;
+			if (emitterTile instanceof BeamCannonBlockEntity) {
+				Vec3 start = SubLevelCompat.toPhysicalPosition(emitterTile, Vec3.atCenterOf(emitterTile.getBlockPos()));
+				Vec3 end = SubLevelCompat.toPhysicalPosition(emitterTile, Vec3.atCenterOf(target));
+				lineDrawer.consume(start.x, start.y, start.z, end.x, end.y, end.z);
+				return null;
+			}
 			UUID targetSubLevelId = emitter.getTargetSubLevelId(side);
 			Vec3 hitPos = SubLevelCompat.linkedTargetPhysicalPosition(emitterTile, target, targetSubLevelId);
 			Vec3 motion = SubLevelCompat.toPhysicalDirection(emitterTile, emitter.getEmittingDirection(side));

@@ -59,6 +59,7 @@ public class EmberEmitterBlockEntity extends BlockEntity implements IEmberPacket
 	public UUID targetSubLevelId = null;
 	public UUID targetTrackingPointId = null;
 	public Vec3 targetPhysicalPosition = null;
+	public boolean rangeLimitedEndpoint;
 	public long ticksExisted = 0;
 	public Random random = new Random();
 	public int offset = random.nextInt(40);
@@ -83,6 +84,7 @@ public class EmberEmitterBlockEntity extends BlockEntity implements IEmberPacket
 		targetSubLevelId = readTargetSubLevelId(nbt);
 		targetTrackingPointId = readUuid(nbt, "targetTrackingPoint");
 		targetPhysicalPosition = readVec3(nbt, "targetPhysicalX", "targetPhysicalY", "targetPhysicalZ");
+		rangeLimitedEndpoint = nbt.getBoolean("rangeLimitedEndpoint");
 		capability.deserializeNBT(nbt);
 	}
 
@@ -101,6 +103,7 @@ public class EmberEmitterBlockEntity extends BlockEntity implements IEmberPacket
 			nbt.putString("targetTrackingPoint", targetTrackingPointId.toString());
 		}
 		writeVec3(nbt, targetPhysicalPosition, "targetPhysicalX", "targetPhysicalY", "targetPhysicalZ");
+		nbt.putBoolean("rangeLimitedEndpoint", rangeLimitedEndpoint);
 		capability.writeToNBT(nbt);
 	}
 
@@ -119,6 +122,7 @@ public class EmberEmitterBlockEntity extends BlockEntity implements IEmberPacket
 			nbt.putString("targetTrackingPoint", targetTrackingPointId.toString());
 		}
 		writeVec3(nbt, targetPhysicalPosition, "targetPhysicalX", "targetPhysicalY", "targetPhysicalZ");
+		nbt.putBoolean("rangeLimitedEndpoint", rangeLimitedEndpoint);
 		return nbt;
 	}
 
@@ -165,12 +169,18 @@ public class EmberEmitterBlockEntity extends BlockEntity implements IEmberPacket
 	}
 
 	public boolean canSendBurst() {
-		refreshTrackedTarget();
+		validateRangeLimitedLink();
 		if (!ConfigManager.isRedstoneControlActive(level, worldPosition) || target == null || level.isClientSide) {
 			return false;
 		}
 		BlockEntity targetTile = SubLevelCompat.findReachableLinkedTarget(this, target, targetSubLevelId, targetPhysicalPosition);
+		if (isRangeLimitedEndpoint(targetTile)) {
+			rangeLimitedEndpoint = true;
+		}
 		if (targetTile == null) {
+			if (rangeLimitedEndpoint && SubLevelCompat.isCrossSubLevelLink(this, targetSubLevelId)) {
+				clearTarget();
+			}
 			return false;
 		}
 		if (!SubLevelCompat.isInSubLevel(this) && !SubLevelCompat.isInSubLevel(targetTile)) {
@@ -189,6 +199,20 @@ public class EmberEmitterBlockEntity extends BlockEntity implements IEmberPacket
 			}
 		}
 		return true;
+	}
+
+	public void validateRangeLimitedLink() {
+		if (target == null || level == null || level.isClientSide) {
+			return;
+		}
+		refreshTrackedTarget();
+		BlockEntity targetTile = SubLevelCompat.findReachableLinkedTarget(this, target, targetSubLevelId, targetPhysicalPosition);
+		if (isRangeLimitedEndpoint(targetTile)) {
+			rangeLimitedEndpoint = true;
+		}
+		if (targetTile == null && rangeLimitedEndpoint && SubLevelCompat.isCrossSubLevelLink(this, targetSubLevelId)) {
+			clearTarget();
+		}
 	}
 
 	public static Vec3 getBurstVelocity(Direction facing) {
@@ -228,6 +252,7 @@ public class EmberEmitterBlockEntity extends BlockEntity implements IEmberPacket
 		targetSubLevelId = null;
 		targetTrackingPointId = null;
 		targetPhysicalPosition = null;
+		rangeLimitedEndpoint = false;
 		this.setChanged();
 	}
 
@@ -238,7 +263,22 @@ public class EmberEmitterBlockEntity extends BlockEntity implements IEmberPacket
 		targetSubLevelId = trackedPosition.subLevelId();
 		targetTrackingPointId = trackedPosition.trackingPointId();
 		targetPhysicalPosition = trackedPosition.physicalPosition();
+		rangeLimitedEndpoint = isRangeLimitedEndpoint(targetEntity);
 		this.setChanged();
+	}
+
+	private static boolean isRangeLimitedEndpoint(BlockEntity targetEntity) {
+		return targetEntity instanceof EmberFunnelBlockEntity
+				|| targetEntity != null && targetEntity.getType() == RegistryManager.EMBER_RECEIVER_ENTITY.get();
+	}
+
+	private void clearTarget() {
+		target = null;
+		targetSubLevelId = null;
+		targetTrackingPointId = null;
+		targetPhysicalPosition = null;
+		rangeLimitedEndpoint = false;
+		setChanged();
 	}
 
 	@Override

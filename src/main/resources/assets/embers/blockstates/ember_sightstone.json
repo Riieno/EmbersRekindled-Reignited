@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "facing=up": { "model": "embers:block/ember_sightstone" },
+    "facing=down": { "model": "embers:block/ember_sightstone", "x": 180 },
+    "facing=north": { "model": "embers:block/ember_sightstone", "x": 90 },
+    "facing=south": { "model": "embers:block/ember_sightstone", "x": 90, "y": 180 },
+    "facing=east": { "model": "embers:block/ember_sightstone", "x": 90, "y": 90 },
+    "facing=west": { "model": "embers:block/ember_sightstone", "x": 90, "y": 270 }
+  }
+}

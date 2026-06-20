@@ -1,0 +1,24 @@
+{
+  "neoforge:conditions": [
+    { "type": "neoforge:mod_loaded", "modid": "create" },
+    { "type": "neoforge:mod_loaded", "modid": "aeronautics" }
+  ],
+  "type": "embers:alchemy",
+  "aspects": [
+    { "tag": "embers:aspectus/copper" },
+    { "tag": "embers:aspectus/silver" },
+    { "tag": "embers:aspectus/dawnstone" }
+  ],
+  "inputs": [
+    { "item": "embers:focal_lens" },
+    { "item": "create:polished_rose_quartz" },
+    { "item": "aeronautics:end_stone_powder" },
+    { "tag": "c:plates/dawnstone" }
+  ],
+  "output": {
+    "id": "embers:ember_sightstone"
+  },
+  "tablet": {
+    "item": "embers:ember_crystal"
+  }
+}

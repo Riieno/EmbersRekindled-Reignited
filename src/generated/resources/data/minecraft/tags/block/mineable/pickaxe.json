@@ -138,9 +138,17 @@
     "embers:mnemonic_inscriber",
     "embers:entropic_enumerator",
     "embers:heat_exchanger",
-    "embers:heat_insulation",
-    "embers:excavation_buckets",
-    {
+	"embers:heat_insulation",
+	"embers:excavation_buckets",
+	{
+	  "id": "embers:caminite_turngear",
+	  "required": false
+	},
+	{
+	  "id": "embers:ember_sightstone",
+	  "required": false
+	},
+	{
       "id": "embers:explosion_pedestal",
       "required": false
     }

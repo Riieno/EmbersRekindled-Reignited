@@ -56,6 +56,7 @@ repositories {
 
 def referenceLibs = fileTree('E:/create-thrusters/libs') {
     include '*.jar'
+    exclude 'sable-neoforge-1.21.1-1.2.2.jar'
 }
 
 neoForge {
@@ -96,6 +97,7 @@ neoForge {
 
 dependencies {
     compileOnly referenceLibs
+    compileOnly "maven.modrinth:sable:2.0.3+mc1.21.1"
     compileOnly "dev.engine-room.flywheel:flywheel-neoforge-api-${minecraft_version}:1.0.6"
     compileOnly "mezz.jei:jei-1.21.1-neoforge-api:${jei_version}"
     compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"

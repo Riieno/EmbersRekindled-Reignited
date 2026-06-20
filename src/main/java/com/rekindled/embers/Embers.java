@@ -9,6 +9,7 @@ import com.rekindled.embers.api.capabilities.EmbersCapabilities;
 import com.rekindled.embers.api.power.IEmberCapability;
 import com.rekindled.embers.apiimpl.EmbersAPIImpl;
 import com.rekindled.embers.compat.create.CreateCompat;
+import com.rekindled.embers.compat.aeronautics.AeronauticsCompat;
 import com.rekindled.embers.compat.createthrusters.ThrustersCompat;
 import com.rekindled.embers.compat.curios.CuriosCompat;
 import com.rekindled.embers.compat.legacy.capabilities.ForgeCapabilities;
@@ -97,6 +98,9 @@ public class Embers {
 		}
 		if (ModList.get().isLoaded("create")) {
 			CreateCompat.init(modEventBus);
+		}
+		if (ModList.get().isLoaded("create") && ModList.get().isLoaded("aeronautics")) {
+			AeronauticsCompat.init(modEventBus);
 		}
 		if (ModList.get().isLoaded("create") && ModList.get().isLoaded("createthrusters")) {
 			ThrustersCompat.init(modEventBus);

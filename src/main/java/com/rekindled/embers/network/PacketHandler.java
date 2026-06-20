@@ -16,6 +16,7 @@ import com.rekindled.embers.network.message.MessageItemSound;
 import com.rekindled.embers.network.message.MessageResearchData;
 import com.rekindled.embers.network.message.MessageResearchTick;
 import com.rekindled.embers.network.message.MessageScalesData;
+import com.rekindled.embers.network.message.MessageTurngearControl;
 import com.rekindled.embers.network.message.MessageWorldSeed;
 
 import net.minecraft.network.FriendlyByteBuf;
@@ -49,6 +50,7 @@ public final class PacketHandler {
 		register(MessageCasterOrb.class, MessageCasterOrb::encode, MessageCasterOrb::decode, MessageCasterOrb::handle);
 		register(MessageScalesData.class, MessageScalesData::encode, MessageScalesData::decode, MessageScalesData::handle);
 		register(MessageCrystalCellGrowFX.class, MessageCrystalCellGrowFX::encode, MessageCrystalCellGrowFX::decode, MessageCrystalCellGrowFX::handle);
+		register(MessageTurngearControl.class, MessageTurngearControl::encode, MessageTurngearControl::decode, MessageTurngearControl::handle);
 	}
 
 	private PacketHandler() {

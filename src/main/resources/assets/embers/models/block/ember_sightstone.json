@@ -1,0 +1,56 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "cutout",
+  "textures": {
+    "casing": "embers:block/caminite_bricks",
+    "rim": "embers:block/dawn_stone_rim",
+    "copper": "embers:block/copper_thin_coil",
+    "glyph": "embers:block/ember_sightstone_glyph",
+    "particle": "embers:block/caminite_bricks"
+  },
+  "elements": [
+    {
+      "name": "Funnel mounting pin",
+      "from": [6, 0, 6], "to": [10, 3, 10],
+      "faces": {
+        "north": {"texture": "#copper"}, "east": {"texture": "#copper"},
+        "south": {"texture": "#copper"}, "west": {"texture": "#copper"},
+        "up": {"texture": "#rim"}, "down": {"texture": "#copper"}
+      }
+    },
+    {
+      "name": "Dial body",
+      "from": [3, 3, 3], "to": [13, 5, 13],
+      "faces": {
+        "north": {"texture": "#casing"}, "east": {"texture": "#casing"},
+        "south": {"texture": "#casing"}, "west": {"texture": "#casing"},
+        "up": {"texture": "#glyph"}, "down": {"texture": "#casing"}
+      }
+    },
+    {
+      "name": "North dawnstone rim",
+      "from": [3, 5, 3], "to": [13, 6, 4],
+      "faces": {"north": {"texture": "#rim"}, "east": {"texture": "#rim"}, "south": {"texture": "#rim"}, "west": {"texture": "#rim"}, "up": {"texture": "#rim"}, "down": {"texture": "#rim"}}
+    },
+    {
+      "name": "South dawnstone rim",
+      "from": [3, 5, 12], "to": [13, 6, 13],
+      "faces": {"north": {"texture": "#rim"}, "east": {"texture": "#rim"}, "south": {"texture": "#rim"}, "west": {"texture": "#rim"}, "up": {"texture": "#rim"}, "down": {"texture": "#rim"}}
+    },
+    {
+      "name": "West dawnstone rim",
+      "from": [3, 5, 4], "to": [4, 6, 12],
+      "faces": {"north": {"texture": "#rim"}, "east": {"texture": "#rim"}, "south": {"texture": "#rim"}, "west": {"texture": "#rim"}, "up": {"texture": "#rim"}, "down": {"texture": "#rim"}}
+    },
+    {
+      "name": "East dawnstone rim",
+      "from": [12, 5, 4], "to": [13, 6, 12],
+      "faces": {"north": {"texture": "#rim"}, "east": {"texture": "#rim"}, "south": {"texture": "#rim"}, "west": {"texture": "#rim"}, "up": {"texture": "#rim"}, "down": {"texture": "#rim"}}
+    },
+    {
+      "name": "Raised ember lens",
+      "from": [6, 5.8, 6], "to": [10, 6.2, 10],
+      "faces": {"up": {"uv": [6, 6, 10, 10], "texture": "#glyph"}}
+    }
+  ]
+}

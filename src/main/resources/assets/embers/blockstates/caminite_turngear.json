@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "axis=x": { "model": "embers:block/caminite_turngear", "y": 90 },
+    "axis=z": { "model": "embers:block/caminite_turngear" }
+  }
+}

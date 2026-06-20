@@ -1407,5 +1407,22 @@
   "subtitles.embers.item.inflictor_gem.absorb": "Inflictor Gem absorbs damage",
   "subtitles.embers.item.metallurgic_dust.convert": "Metallurgic Dust transmutes ore",
   "subtitles.embers.item.metallurgic_dust.fail": "Metallurgic Dust transmutes ore to worthless material",
-  "subtitles.embers.item.resonating_bell.ring": "Resonating Bell rings"
+  "subtitles.embers.item.resonating_bell.ring": "Resonating Bell rings",
+  "block.embers.caminite_turngear": "Caminite Turngear",
+  "block.embers.ember_sightstone": "Ember Sightstone",
+  "embers.turngear.mode": "Targeting Mode",
+  "embers.turngear.mode.auto_detect": "Auto Detect",
+  "embers.turngear.mode.manual": "Manual",
+  "embers.turngear.mode.linked": "Linked",
+  "embers.turngear.mode_value": "Mode: %s",
+  "embers.turngear.link_count": "Linked Sightstones: %s / %s",
+  "embers.turngear.ember_status": "Target Ember: %s / %s",
+  "embers.turngear.no_target": "No Sightstone in range",
+  "embers.turngear.no_selection": "Select a turngear in Linked mode first",
+  "embers.turngear.linked_mode_required": "Set the turngear to Linked mode first",
+  "embers.turngear.selected": "Turngear selected; strike sightstones to toggle links",
+  "embers.turngear.link_limit": "This turngear already has %s linked sightstones",
+  "embers.turngear.link_added": "Sightstone linked (%s / %s)",
+  "embers.turngear.link_removed": "Sightstone unlinked (%s / %s)",
+  "embers.turngear.occupied": "This turngear is already occupied"
 }

@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import com.rekindled.embers.Embers;
 import com.rekindled.embers.EmbersClientEvents;
 import com.rekindled.embers.api.EmbersAPI;
+import com.rekindled.embers.api.block.IHammerInteraction;
 import com.rekindled.embers.api.power.IEmberPacketProducer;
 import com.rekindled.embers.api.power.IEmberPacketReceiver;
 import com.rekindled.embers.api.power.ITargetable;
@@ -58,6 +59,12 @@ public class TinkerHammerItem extends Item {
 		BlockPos pos = context.getClickedPos();
 		Level world = context.getLevel();
 		BlockEntity tile = SubLevelCompat.findAtPosition(world, pos);
+		if (tile instanceof IHammerInteraction hammerInteraction) {
+			InteractionResult result = hammerInteraction.onHammerUse(stack, context);
+			if (result != InteractionResult.PASS) {
+				return result;
+			}
+		}
 		if (world != null && nbt.contains("targetWorld") && world.dimension().location().toString().equals(nbt.getString("targetWorld"))) {
 			BlockPos targetPos = new BlockPos(nbt.getInt("targetX"), nbt.getInt("targetY"), nbt.getInt("targetZ"));
 			UUID targetSubLevelId = readSubLevelId(nbt, "targetSubLevel");

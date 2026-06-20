@@ -131,6 +131,43 @@ public final class SubLevelCompat {
 		}
 	}
 
+	public static boolean isCrossSubLevelLink(BlockEntity origin, @Nullable UUID targetSubLevelId) {
+		return origin != null && !Objects.equals(getContainingSubLevelId(origin), targetSubLevelId);
+	}
+
+	public static <T extends BlockEntity> List<T> findBlockEntitiesInPhysicalRange(BlockEntity origin, Class<T> type, double range) {
+		if (origin == null || type == null || range < 0 || !(rootLevel(origin.getLevel()) instanceof ServerLevel serverLevel)) {
+			return List.of();
+		}
+		Vec3 center = toPhysicalPosition(origin, Vec3.atCenterOf(origin.getBlockPos()));
+		double rangeSquared = range * range;
+		List<T> matches = new ArrayList<>();
+		for (BlockEntity blockEntity : getLoadedBlockEntitiesIncludingSubLevels(serverLevel)) {
+			if (!type.isInstance(blockEntity)) {
+				continue;
+			}
+			Vec3 candidate = toPhysicalPosition(blockEntity, Vec3.atCenterOf(blockEntity.getBlockPos()));
+			if (center.distanceToSqr(candidate) <= rangeSquared) {
+				matches.add(type.cast(blockEntity));
+			}
+		}
+		return matches;
+	}
+
+	private static Level rootLevel(@Nullable Level level) {
+		if (level == null) {
+			return null;
+		}
+		try {
+			Object parent = level.getClass().getMethod("getLevel").invoke(level);
+			if (parent instanceof Level parentLevel && parentLevel != level) {
+				return parentLevel;
+			}
+		} catch (ReflectiveOperationException | RuntimeException ignored) {
+		}
+		return level;
+	}
+
 	public static @Nullable BlockEntity findLinkedTarget(BlockEntity origin, @Nullable BlockPos targetPosition, @Nullable UUID targetSubLevelId) {
 		if (origin == null || targetPosition == null || origin.getLevel() == null) {
 			return null;
@@ -367,20 +404,21 @@ public final class SubLevelCompat {
 	}
 
 	private static List<BlockEntity> getLoadedBlockEntitiesIncludingSubLevels(ServerLevel level) {
-		Map<BlockPos, BlockEntity> blockEntities = new LinkedHashMap<>();
+		List<BlockEntity> blockEntities = new ArrayList<>();
+		Set<BlockEntity> seen = Collections.newSetFromMap(new IdentityHashMap<>());
 		for (BlockEntity blockEntity : getLoadedLevelBlockEntities(level)) {
-			if (blockEntity != null && !blockEntity.isRemoved()) {
-				blockEntities.put(blockEntity.getBlockPos().immutable(), blockEntity);
+			if (blockEntity != null && !blockEntity.isRemoved() && seen.add(blockEntity)) {
+				blockEntities.add(blockEntity);
 			}
 		}
 		for (Object subLevel : getAllSubLevels(level)) {
 			for (BlockEntity blockEntity : getBlockEntities(subLevel)) {
-				if (blockEntity != null && !blockEntity.isRemoved()) {
-					blockEntities.putIfAbsent(blockEntity.getBlockPos().immutable(), blockEntity);
+				if (blockEntity != null && !blockEntity.isRemoved() && seen.add(blockEntity)) {
+					blockEntities.add(blockEntity);
 				}
 			}
 		}
-		return new ArrayList<>(blockEntities.values());
+		return blockEntities;
 	}
 
 	private static List<BlockEntity> getLoadedLevelBlockEntities(ServerLevel level) {

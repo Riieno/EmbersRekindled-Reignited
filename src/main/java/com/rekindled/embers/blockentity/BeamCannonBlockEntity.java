@@ -70,6 +70,7 @@ public class BeamCannonBlockEntity extends BlockEntity implements IUpgradeable, 
 	public Random random = new Random();
 	public int offset = random.nextInt(40);
 	protected List<UpgradeContext> upgrades = new LinkedList<UpgradeContext>();
+	private int mountedFireCooldown;
 
 	public BeamCannonBlockEntity(BlockPos pPos, BlockState pBlockState) {
 		super(RegistryManager.BEAM_CANNON_ENTITY.get(), pPos, pBlockState);
@@ -101,6 +102,9 @@ public class BeamCannonBlockEntity extends BlockEntity implements IUpgradeable, 
 
 	public static void serverTick(Level level, BlockPos pos, BlockState state, BeamCannonBlockEntity blockEntity) {
 		blockEntity.ticksExisted ++;
+		if (blockEntity.mountedFireCooldown > 0) {
+			blockEntity.mountedFireCooldown--;
+		}
 		Direction facing = state.getValue(BlockStateProperties.FACING);
 		BlockEntity attachedTile = SubLevelCompat.findAdjacent(blockEntity, facing.getOpposite());
 		if (blockEntity.ticksExisted % 5 == 0 && attachedTile != null) {
@@ -118,7 +122,8 @@ public class BeamCannonBlockEntity extends BlockEntity implements IUpgradeable, 
 		boolean isPowered = level.hasNeighborSignal(pos);
 		boolean redstoneEnabled = UpgradeUtil.getOtherParameter(blockEntity, "redstone_enabled", true, blockEntity.upgrades);
 		int threshold = UpgradeUtil.getOtherParameter(blockEntity, "fire_threshold", FIRE_THRESHOLD, blockEntity.upgrades);
-		if (!cancel && blockEntity.capability.getEmber() >= threshold && (!redstoneEnabled || (isPowered && !blockEntity.lastPowered))){
+		boolean redstoneFiring = !redstoneEnabled || isPowered && !blockEntity.lastPowered;
+		if (!cancel && redstoneFiring && blockEntity.capability.getEmber() >= threshold) {
 			blockEntity.fire(facing);
 		}
 		blockEntity.lastPowered = isPowered;
@@ -137,42 +142,55 @@ public class BeamCannonBlockEntity extends BlockEntity implements IUpgradeable, 
 	}
 
 	public void fire(Direction facing) {
-		Vec3 ray = new Vec3(facing.getNormal().getX(), facing.getNormal().getY(), facing.getNormal().getZ());
+		Vec3 localRay = Vec3.atLowerCornerOf(facing.getNormal());
+		firePhysical(SubLevelCompat.toPhysicalDirection(this, localRay));
+	}
+
+	public boolean tryMountedFire() {
+		int threshold = UpgradeUtil.getOtherParameter(this, "fire_threshold", FIRE_THRESHOLD, upgrades);
+		if (mountedFireCooldown > 0 || capability.getEmber() < threshold) {
+			return false;
+		}
+		mountedFireCooldown = 10;
+		fire(getBlockState().getValue(BlockStateProperties.FACING));
+		return true;
+	}
+
+	private void firePhysical(Vec3 physicalDirection) {
+		Vec3 ray = physicalDirection.normalize();
 		double damage = UpgradeUtil.getOtherParameter(this, "damage", DAMAGE, upgrades);
-		boolean doContinue = true;
 		int maxDist = UpgradeUtil.getOtherParameter(this, "distance", MAX_DISTANCE, upgrades);
-		double impactDist = maxDist;
-		BlockPos hitPos = worldPosition;
 		Vec3 start = SubLevelCompat.toPhysicalPosition(this, Vec3.atCenterOf(worldPosition));
-		Vec3 impactPos = start.add(SubLevelCompat.toPhysicalDirection(this, ray).scale(maxDist));
-		for (int i = 0; i < maxDist && doContinue; i++) {
-			hitPos = hitPos.relative(facing);
-			BlockState state = SubLevelCompat.findBlockState(this, hitPos);
-			BlockEntity tile = SubLevelCompat.findAtPhysicalPosition(this, hitPos);
+		Vec3 impactPos = start.add(ray.scale(maxDist));
+		for (double distance = 0.75D; distance <= maxDist; distance += 0.25D) {
+			Vec3 sample = start.add(ray.scale(distance));
+			BlockEntity tile = SubLevelCompat.findAtPhysicalPosition(level, sample);
+			if (tile == this) {
+				continue;
+			}
+			BlockState state = SubLevelCompat.findBlockState(level, sample);
 			if (sparkTarget(tile)) {
-				doContinue = false;
-				impactDist = i + 1;
-				impactPos = SubLevelCompat.toPhysicalPosition(this, Vec3.atCenterOf(hitPos));
+				impactPos = sample;
 			} else if (tile instanceof IEmberPacketReceiver) {
 				IEmberCapability cap = com.rekindled.embers.util.CapabilityCompat.getCapability(tile, EmbersCapabilities.EMBER_CAPABILITY, null).orElse(null);
 				if (cap != null) {
 					cap.addAmount(capability.getEmber(), true);
 				}
-				doContinue = false;
-				impactDist = i + 1;
-				impactPos = SubLevelCompat.toPhysicalPosition(this, Vec3.atCenterOf(hitPos));
-			} else if (state != null && !state.getCollisionShape(level, hitPos).isEmpty()) {
-				doContinue = false;
-				impactDist = i + 0.5;
-				impactPos = SubLevelCompat.toPhysicalPosition(this, Vec3.atCenterOf(hitPos))
-						.subtract(SubLevelCompat.toPhysicalDirection(this, ray).scale(0.5));
+				impactPos = sample;
+			} else if (state != null && !state.isAir()
+					&& !state.getCollisionShape(level, BlockPos.containing(sample)).isEmpty()) {
+				impactPos = sample;
+			} else {
+				continue;
 			}
-			if (!doContinue) {
-				level.playSound(null, BlockPos.containing(impactPos), EmbersSounds.BEAM_CANNON_HIT.get(), SoundSource.BLOCKS, 0.5f, 1.0f);
-			}
+			level.playSound(null, BlockPos.containing(impactPos), EmbersSounds.BEAM_CANNON_HIT.get(), SoundSource.BLOCKS, 0.5f, 1.0f);
+			break;
 		}
-		List<Entity> entities = level.getEntities((Entity) null, new AABB(start, impactPos), EntitySelector.NO_SPECTATORS);
+		List<Entity> entities = level.getEntities((Entity) null, new AABB(start, impactPos).inflate(0.75D), EntitySelector.NO_SPECTATORS);
 		for (Entity entity : entities) {
+			if (distanceToSegmentSqr(entity.getBoundingBox().getCenter(), start, impactPos) > 0.75D * 0.75D) {
+				continue;
+			}
 			DamageSource damageSource = new DamageEmber(level.registryAccess().registry(Registries.DAMAGE_TYPE).get().getHolderOrThrow(EmbersDamageTypes.EMBER_KEY), start);
 			entity.hurt(damageSource, (float)damage);
 		}
@@ -186,6 +204,16 @@ public class BeamCannonBlockEntity extends BlockEntity implements IUpgradeable, 
 		this.setChanged();
 
 		level.playSound(null, worldPosition, EmbersSounds.BEAM_CANNON_FIRE.get(), SoundSource.BLOCKS, 0.7f, 1.0f);
+	}
+
+	private static double distanceToSegmentSqr(Vec3 point, Vec3 start, Vec3 end) {
+		Vec3 segment = end.subtract(start);
+		double lengthSquared = segment.lengthSqr();
+		if (lengthSquared < 1.0E-9D) {
+			return point.distanceToSqr(start);
+		}
+		double progress = Math.max(0.0D, Math.min(1.0D, point.subtract(start).dot(segment) / lengthSquared));
+		return point.distanceToSqr(start.add(segment.scale(progress)));
 	}
 
 	public boolean sparkTarget(BlockEntity target) {
