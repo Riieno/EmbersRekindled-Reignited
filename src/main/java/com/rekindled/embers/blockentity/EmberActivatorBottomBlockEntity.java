@@ -19,6 +19,7 @@ import com.rekindled.embers.recipe.IEmberActivationRecipe;
 import com.rekindled.embers.recipe.SingleItemContainer;
 import com.rekindled.embers.util.EmbersColors;
 import com.rekindled.embers.util.Misc;
+import com.rekindled.embers.util.SubLevelParticleUtil;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -108,8 +109,8 @@ public class EmberActivatorBottomBlockEntity extends BlockEntity implements IExt
 								level.playSound(null, pos, EmbersSounds.ACTIVATOR.get(), SoundSource.BLOCKS, 1.0f, 1.0f);
 
 								if (level instanceof ServerLevel serverLevel) {
-									serverLevel.sendParticles(new GlowParticleOptions(EmbersColors.EMBER_ID, new Vec3(0, 0.65f, 0), 4.7f), pos.getX() + 0.5f, pos.getY() + 1.5f, pos.getZ() + 0.5f, 80, 0.1, 0.1, 0.1, 1.0);
-									serverLevel.sendParticles(SmokeParticleOptions.BIG_SMOKE, pos.getX() + 0.5, pos.getY() + 1.5, pos.getZ() + 0.5, 20, 0.1, 0.1, 0.1, 1.0);
+									SubLevelParticleUtil.send(blockEntity, new GlowParticleOptions(EmbersColors.EMBER_ID, new Vec3(0, 0.65f, 0), 4.7f), pos.getX() + 0.5f, pos.getY() + 1.5f, pos.getZ() + 0.5f, 80, 0.1, 0.1, 0.1, 1.0);
+									SubLevelParticleUtil.send(blockEntity, SmokeParticleOptions.BIG_SMOKE, pos.getX() + 0.5, pos.getY() + 1.5, pos.getZ() + 0.5, 20, 0.1, 0.1, 0.1, 1.0);
 								}
 								UpgradeUtil.throwEvent(blockEntity, new EmberEvent(blockEntity, EmberEvent.EnumType.PRODUCE, ember), blockEntity.upgrades);
 								top.capability.addAmount(ember, true);

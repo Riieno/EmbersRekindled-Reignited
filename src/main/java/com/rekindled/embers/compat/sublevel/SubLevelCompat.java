@@ -25,6 +25,7 @@ import com.rekindled.embers.blockentity.BeamSplitterBlockEntity;
 import com.rekindled.embers.blockentity.EmberEmitterBlockEntity;
 import com.rekindled.embers.blockentity.EmberRelayBlockEntity;
 import com.rekindled.embers.blockentity.MirrorRelayBlockEntity;
+import com.rekindled.embers.compat.create.CreateCompat;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -37,6 +38,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.fml.ModList;
 
 public final class SubLevelCompat {
 	private static Object helper;
@@ -179,6 +181,10 @@ public final class SubLevelCompat {
 			}
 			return null;
 		}
+		BlockEntity movingTarget = findMovingCreateReceiver(origin.getLevel(), targetPosition);
+		if (movingTarget != null) {
+			return movingTarget;
+		}
 		BlockEntity target = findAtPhysicalPosition(origin.getLevel(), Vec3.atCenterOf(targetPosition));
 		return target != null ? target : findAtPhysicalPosition(origin, targetPosition);
 	}
@@ -194,6 +200,9 @@ public final class SubLevelCompat {
 		}
 		if (target == null || origin == null || origin.getLevel() == null || targetPosition == null) {
 			return null;
+		}
+		if (targetSubLevelId == null && target == findMovingCreateReceiver(origin.getLevel(), targetPosition)) {
+			return target;
 		}
 		UUID actualSubLevelId = getContainingSubLevelId(target);
 		if (targetPosition.equals(target.getBlockPos()) && Objects.equals(targetSubLevelId, actualSubLevelId)) {
@@ -220,12 +229,22 @@ public final class SubLevelCompat {
 			Object subLevel = getSubLevel(level, subLevelId);
 			return subLevel == null ? null : findBlockEntityInAccess(level, subLevel, position);
 		}
+		BlockEntity movingTarget = findMovingCreateReceiver(level, position);
+		if (movingTarget != null) {
+			return movingTarget;
+		}
 		return findAtPosition(level, position);
 	}
 
 	public static Vec3 linkedTargetPhysicalPosition(BlockEntity origin, @Nullable BlockPos targetPosition, @Nullable UUID targetSubLevelId) {
 		if (targetPosition == null) {
 			return origin == null ? Vec3.ZERO : Vec3.atCenterOf(origin.getBlockPos());
+		}
+		if (origin != null && origin.getLevel() != null && targetSubLevelId == null) {
+			Vec3 movingPosition = findMovingCreateReceiverPosition(origin.getLevel(), targetPosition);
+			if (movingPosition != null) {
+				return movingPosition;
+			}
 		}
 		if (origin == null || origin.getLevel() == null || targetSubLevelId == null) {
 			return Vec3.atCenterOf(targetPosition);
@@ -240,6 +259,12 @@ public final class SubLevelCompat {
 	public static Vec3 storedPhysicalPosition(Level level, @Nullable BlockPos position, @Nullable UUID subLevelId) {
 		if (position == null) {
 			return Vec3.ZERO;
+		}
+		if (level != null && subLevelId == null) {
+			Vec3 movingPosition = findMovingCreateReceiverPosition(level, position);
+			if (movingPosition != null) {
+				return movingPosition;
+			}
 		}
 		if (level == null || subLevelId == null) {
 			return Vec3.atCenterOf(position);
@@ -259,6 +284,12 @@ public final class SubLevelCompat {
 	private static Vec3 currentTrackedPhysicalPosition(@Nullable Level level, @Nullable BlockEntity origin, @Nullable BlockPos position, @Nullable UUID subLevelId, @Nullable Vec3 fallbackPhysicalPosition) {
 		if (position == null) {
 			return origin == null ? Vec3.ZERO : Vec3.atCenterOf(origin.getBlockPos());
+		}
+		if (level != null && subLevelId == null) {
+			Vec3 movingPosition = findMovingCreateReceiverPosition(level, position);
+			if (movingPosition != null) {
+				return movingPosition;
+			}
 		}
 		if (level != null && subLevelId != null) {
 			Object subLevel = getSubLevel(level, subLevelId);
@@ -593,6 +624,10 @@ public final class SubLevelCompat {
 		if (level == null) {
 			return null;
 		}
+		BlockEntity movingTarget = findMovingCreateReceiver(level, localPosition);
+		if (movingTarget != null) {
+			return movingTarget;
+		}
 		init();
 		if (helper == null || getContaining == null || runIncludingSubLevels == null) {
 			return level.getBlockEntity(localPosition);
@@ -656,6 +691,10 @@ public final class SubLevelCompat {
 		if (direct != null) {
 			return direct;
 		}
+		BlockEntity movingTarget = findMovingCreateReceiver(level, physicalPosition);
+		if (movingTarget != null) {
+			return movingTarget;
+		}
 		init();
 		if (helper == null || runIncludingSubLevels == null) {
 			return null;
@@ -665,6 +704,39 @@ public final class SubLevelCompat {
 					(BiFunction<Object, BlockPos, BlockEntity>) (subLevel, internalPos) -> findBlockEntityInAccess(level, subLevel, internalPos));
 			return result instanceof BlockEntity blockEntity ? blockEntity : null;
 		} catch (ReflectiveOperationException | RuntimeException ignored) {
+			return null;
+		}
+	}
+
+	private static @Nullable BlockEntity findMovingCreateReceiver(Level level, BlockPos originalPosition) {
+		if (level == null || originalPosition == null || !ModList.get().isLoaded("create")) {
+			return null;
+		}
+		try {
+			return CreateCompat.findMovingEmberReceiver(level, originalPosition);
+		} catch (LinkageError ignored) {
+			return null;
+		}
+	}
+
+	private static @Nullable BlockEntity findMovingCreateReceiver(Level level, Vec3 physicalPosition) {
+		if (level == null || physicalPosition == null || !ModList.get().isLoaded("create")) {
+			return null;
+		}
+		try {
+			return CreateCompat.findMovingEmberReceiver(level, physicalPosition);
+		} catch (LinkageError ignored) {
+			return null;
+		}
+	}
+
+	private static @Nullable Vec3 findMovingCreateReceiverPosition(Level level, BlockPos originalPosition) {
+		if (level == null || originalPosition == null || !ModList.get().isLoaded("create")) {
+			return null;
+		}
+		try {
+			return CreateCompat.getMovingEmberReceiverPosition(level, originalPosition);
+		} catch (LinkageError ignored) {
 			return null;
 		}
 	}
@@ -698,6 +770,13 @@ public final class SubLevelCompat {
 	public static Vec3 toPhysicalPosition(BlockEntity origin, Vec3 localPosition) {
 		if (origin == null || localPosition == null) {
 			return localPosition;
+		}
+		Level level = origin.getLevel();
+		if (level != null && origin == findMovingCreateReceiver(level, origin.getBlockPos())) {
+			Vec3 movingCenter = findMovingCreateReceiverPosition(level, origin.getBlockPos());
+			if (movingCenter != null) {
+				return movingCenter.add(localPosition.subtract(Vec3.atCenterOf(origin.getBlockPos())));
+			}
 		}
 		init();
 		if (helper == null || getContaining == null || logicalPose == null || transformPosition == null) {

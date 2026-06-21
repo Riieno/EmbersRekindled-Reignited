@@ -9,8 +9,10 @@ import com.rekindled.embers.api.capabilities.EmbersCapabilities;
 import com.rekindled.embers.api.power.IEmberCapability;
 
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import com.rekindled.embers.compat.legacy.capabilities.Capability;
 import com.rekindled.embers.compat.legacy.LazyOptional;
 
@@ -26,7 +28,8 @@ public class DefaultEmberItemCapability implements IEmberCapability {
 		setEmberCapacity(capacity);
 		this.capOptional = LazyOptional.of(() -> this);
 
-		CompoundTag BEnbt = com.rekindled.embers.util.ItemData.getTagElement(stack, "BlockEntityTag");
+		CustomData blockEntityData = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+		CompoundTag BEnbt = blockEntityData == null ? com.rekindled.embers.util.ItemData.getTagElement(stack, "BlockEntityTag") : blockEntityData.copyTag();
 		if (BEnbt != null) {
 			setEmberCapacity(BEnbt.getDouble(EMBER_CAPACITY));
 			setEmber(BEnbt.getDouble(EMBER));
@@ -48,27 +51,32 @@ public class DefaultEmberItemCapability implements IEmberCapability {
 	public double getEmber() {
 		if (stack.isEmpty())
 			return 0;
-		return com.rekindled.embers.util.ItemData.getOrCreateTagElement(stack, "ForgeCaps").getDouble(EMBER);
+		CompoundTag tag = com.rekindled.embers.util.ItemData.getTagElement(stack, "ForgeCaps");
+		return tag == null ? 0 : tag.getDouble(EMBER);
 	}
 
 	@Override
 	public double getEmberCapacity() {
 		if (stack.isEmpty())
 			return 0;
-		return com.rekindled.embers.util.ItemData.getOrCreateTagElement(stack, "ForgeCaps").getDouble(EMBER_CAPACITY);
+		CompoundTag tag = com.rekindled.embers.util.ItemData.getTagElement(stack, "ForgeCaps");
+		return tag == null ? 0 : tag.getDouble(EMBER_CAPACITY);
 	}
 
 	@Override
 	public void setEmber(double value) {
 		ember = sanitizeEmber(value, getEmberCapacity());
-		com.rekindled.embers.util.ItemData.getOrCreateTagElement(stack, "ForgeCaps").putDouble(EMBER, ember);
+		double storedEmber = ember;
+		com.rekindled.embers.util.ItemData.updateTagElement(stack, "ForgeCaps", tag -> tag.putDouble(EMBER, storedEmber));
 	}
 
 	@Override
 	public void setEmberCapacity(double value) {
+		double currentEmber = getEmber();
 		capacity = sanitizeCapacity(value);
-		com.rekindled.embers.util.ItemData.getOrCreateTagElement(stack, "ForgeCaps").putDouble(EMBER_CAPACITY, capacity);
-		setEmber(getEmber());
+		double storedCapacity = capacity;
+		com.rekindled.embers.util.ItemData.updateTagElement(stack, "ForgeCaps", tag -> tag.putDouble(EMBER_CAPACITY, storedCapacity));
+		setEmber(currentEmber);
 	}
 
 	@Override

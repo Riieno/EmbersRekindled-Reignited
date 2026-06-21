@@ -18,6 +18,7 @@ import com.rekindled.embers.api.tile.IUpgradeable;
 import com.rekindled.embers.api.upgrades.UpgradeContext;
 import com.rekindled.embers.api.upgrades.UpgradeUtil;
 import com.rekindled.embers.compat.sublevel.SubLevelCompat;
+import com.rekindled.embers.util.SubLevelParticleUtil;
 import com.rekindled.embers.datagen.EmbersSounds;
 import com.rekindled.embers.particle.GlowParticleOptions;
 import com.rekindled.embers.particle.SmokeParticleOptions;
@@ -133,9 +134,7 @@ public class InfernoForgeBottomBlockEntity extends BlockEntity implements IExtra
 	}
 
 	private void addParticle(ParticleOptions particle, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-		Vec3 position = SubLevelCompat.toPhysicalPosition(this, new Vec3(x, y, z));
-		Vec3 speed = SubLevelCompat.toPhysicalDirection(this, new Vec3(xSpeed, ySpeed, zSpeed));
-		level.addParticle(particle, position.x, position.y, position.z, speed.x, speed.y, speed.z);
+		SubLevelParticleUtil.add(this, particle, x, y, z, xSpeed, ySpeed, zSpeed);
 	}
 
 	public static void serverTick(Level level, BlockPos pos, BlockState state, InfernoForgeBottomBlockEntity blockEntity) {
@@ -222,8 +221,8 @@ public class InfernoForgeBottomBlockEntity extends BlockEntity implements IExtra
 		PacketHandler.INSTANCE.sendToAll(new MessageEmberActivationFX(getPos().getX() + 0.5, getPos().getY() + 1.5, getPos().getZ() + 0.5, flameColor, sparkColor));*/
 		if (level instanceof ServerLevel serverLevel) {
 			if (forgeSuccess)
-				serverLevel.sendParticles(new GlowParticleOptions(EmbersColors.EMBER_ID, new Vec3(0, 0.65f, 0), 4.7f), pos.getX() + 0.5f, pos.getY() + 1.5f, pos.getZ() + 0.5f, 80, 0.1, 0.1, 0.1, 1.0);
-			serverLevel.sendParticles(SmokeParticleOptions.BIG_SMOKE, pos.getX() + 0.5, pos.getY() + 1.5, pos.getZ() + 0.5, 20, 0.1, 0.1, 0.1, 1.0);
+				SubLevelParticleUtil.send(blockEntity, new GlowParticleOptions(EmbersColors.EMBER_ID, SubLevelCompat.toPhysicalDirection(blockEntity, new Vec3(0, 0.65f, 0)), 4.7f), pos.getX() + 0.5f, pos.getY() + 1.5f, pos.getZ() + 0.5f, 80, 0.1, 0.1, 0.1, 1.0);
+			SubLevelParticleUtil.send(blockEntity, SmokeParticleOptions.BIG_SMOKE, pos.getX() + 0.5, pos.getY() + 1.5, pos.getZ() + 0.5, 20, 0.1, 0.1, 0.1, 1.0);
 		}
 		blockEntity.setChanged();
 	}

@@ -12,6 +12,7 @@ import com.rekindled.embers.api.capabilities.EmbersCapabilities;
 import com.rekindled.embers.api.tile.IExtraCapabilityInformation;
 import com.rekindled.embers.particle.VaporParticleOptions;
 import com.rekindled.embers.util.Misc;
+import com.rekindled.embers.util.SubLevelParticleUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -207,7 +208,7 @@ public class MelterTopBlockEntity extends OpenTankBlockEntity implements IExtraC
 			float xOffset = 0.5f + (random.nextFloat() - 0.5f) * 2 * 0.2f;
 			float yOffset = 0.9f;
 			float zOffset = 0.5f + (random.nextFloat() - 0.5f) * 2 * 0.2f;
-			level.addParticle(new VaporParticleOptions(color, 2.0f), worldPosition.getX() + xOffset, worldPosition.getY() + yOffset, worldPosition.getZ() + zOffset, 0, 1 / 5f, 0);
+			SubLevelParticleUtil.add(this, new VaporParticleOptions(color, 2.0f), worldPosition.getX() + xOffset, worldPosition.getY() + yOffset, worldPosition.getZ() + zOffset, 0, 1 / 5f, 0);
 		}
 	}
 

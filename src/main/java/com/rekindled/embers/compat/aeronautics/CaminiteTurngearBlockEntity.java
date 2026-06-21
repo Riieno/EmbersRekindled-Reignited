@@ -16,6 +16,7 @@ import com.rekindled.embers.blockentity.BeamCannonBlockEntity;
 import com.rekindled.embers.compat.sublevel.SubLevelCompat;
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
+import com.simibubi.create.foundation.blockEntity.behaviour.BehaviourType;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.blockEntity.behaviour.CenteredSideValueBoxTransform;
 import com.simibubi.create.foundation.blockEntity.behaviour.scrollValue.INamedIconOptions;
@@ -56,6 +57,7 @@ public class CaminiteTurngearBlockEntity extends KineticBlockEntity
 
 	private final Set<UUID> linkedSightstones = new LinkedHashSet<>();
 	private ScrollOptionBehaviour<Mode> mode;
+	private FireControlBehaviour fireControl;
 	private EmberSightstoneBlockEntity trackedSightstone;
 	private long nextTargetScanTick;
 	private UUID trackedSightstoneId;
@@ -71,6 +73,7 @@ public class CaminiteTurngearBlockEntity extends KineticBlockEntity
 	private BlockPos mountedLocalPos;
 	private boolean mountedAssemblyFaulted;
 	private long nextMountedAssemblyTick;
+	private boolean lastRedstonePowered;
 	private final IEmberCapability emberCapability = new DefaultEmberCapability() {
 		@Override
 		public void onContentsChanged() {
@@ -115,9 +118,12 @@ public class CaminiteTurngearBlockEntity extends KineticBlockEntity
 		super.addBehaviours(behaviours);
 		mode = new ScrollOptionBehaviour<>(Mode.class,
 				Component.translatable(Embers.MODID + ".turngear.mode"), this,
-				new CenteredSideValueBoxTransform((state, side) -> side.getAxis().isHorizontal()));
+				new TurngearValueBoxTransform(4.0D));
 		mode.withCallback(value -> onModeChanged());
 		behaviours.add(mode);
+		fireControl = new FireControlBehaviour(this, new TurngearValueBoxTransform(12.0D));
+		fireControl.withCallback(value -> onFireControlChanged());
+		behaviours.add(fireControl);
 	}
 
 	@Override
@@ -126,6 +132,7 @@ public class CaminiteTurngearBlockEntity extends KineticBlockEntity
 		if (!(level instanceof ServerLevel serverLevel)) {
 			return;
 		}
+		boolean redstonePulse = pollRedstonePulse();
 		if (!mountedAssemblyFaulted && mountedSubLevelId != null && !mountedAssembly.hasMountedBlock(this, serverLevel)) {
 			mountedAssembly.clearInvalidAssembly(this, serverLevel);
 			nextMountedAssemblyTick = level.getGameTime() + 1L;
@@ -163,7 +170,7 @@ public class CaminiteTurngearBlockEntity extends KineticBlockEntity
 				&& level.getGameTime() >= nextMountedAssemblyTick) {
 			try {
 				boolean aligned = mountedAssembly.aim(this, serverLevel, beamDirection);
-				if (aligned && shouldAutoFire()) {
+				if (aligned && shouldFire(redstonePulse)) {
 					BeamCannonBlockEntity cannon = mountedAssembly.resolveCannon(this, serverLevel);
 					if (cannon != null) {
 						cannon.tryMountedFire();
@@ -236,9 +243,20 @@ public class CaminiteTurngearBlockEntity extends KineticBlockEntity
 		return blended.lengthSqr() < 1.0E-6D ? to : blended.normalize();
 	}
 
-	public boolean shouldAutoFire() {
-		return !isManualMode() && getSpeed() != 0.0F && trackedSightstoneId != null
+	private boolean shouldFire(boolean redstonePulse) {
+		boolean targetReady = !isManualMode() && getSpeed() != 0.0F && trackedSightstoneId != null
 				&& trackedCapacity > 0.0D && trackedEmber < trackedCapacity;
+		return targetReady && (getFireControl() == FireControl.AUTO || redstonePulse);
+	}
+
+	private boolean pollRedstonePulse() {
+		boolean powered = level.hasNeighborSignal(worldPosition);
+		boolean pulse = powered && !lastRedstonePowered;
+		if (powered != lastRedstonePowered) {
+			lastRedstonePowered = powered;
+			setChanged();
+		}
+		return pulse;
 	}
 
 	public boolean isManualMode() {
@@ -247,6 +265,10 @@ public class CaminiteTurngearBlockEntity extends KineticBlockEntity
 
 	public Mode getMode() {
 		return mode == null ? Mode.AUTO_DETECT : mode.get();
+	}
+
+	public FireControl getFireControl() {
+		return fireControl == null ? FireControl.AUTO : fireControl.get();
 	}
 
 	@Override
@@ -381,6 +403,10 @@ public class CaminiteTurngearBlockEntity extends KineticBlockEntity
 		}
 	}
 
+	private void onFireControlChanged() {
+		lastRedstonePowered = level != null && level.hasNeighborSignal(worldPosition);
+	}
+
 	@Override
 	public InteractionResult onHammerUse(ItemStack hammer, UseOnContext context) {
 		if (level == null) {
@@ -438,6 +464,7 @@ public class CaminiteTurngearBlockEntity extends KineticBlockEntity
 			tag.putUUID("trackedSightstone", trackedSightstoneId);
 		}
 		tag.putInt("linkedSightstoneCount", linkedSightstones.size());
+		tag.putBoolean("lastRedstonePowered", lastRedstonePowered);
 		emberCapability.writeToNBT(tag);
 		if (mountedSubLevelId != null) {
 			tag.putUUID("mountedSubLevel", mountedSubLevelId);
@@ -465,6 +492,7 @@ public class CaminiteTurngearBlockEntity extends KineticBlockEntity
 		trackedCapacity = tag.getDouble("trackedCapacity");
 		trackedSightstoneId = tag.hasUUID("trackedSightstone") ? tag.getUUID("trackedSightstone") : null;
 		syncedLinkedSightstoneCount = tag.getInt("linkedSightstoneCount");
+		lastRedstonePowered = tag.getBoolean("lastRedstonePowered");
 		emberCapability.deserializeNBT(tag);
 		mountedSubLevelId = tag.hasUUID("mountedSubLevel") ? tag.getUUID("mountedSubLevel")
 				: tag.hasUUID("cannonSubLevel") ? tag.getUUID("cannonSubLevel") : null;
@@ -525,6 +553,8 @@ public class CaminiteTurngearBlockEntity extends KineticBlockEntity
 	public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
 		tooltip.add(Component.translatable(Embers.MODID + ".turngear.mode_value",
 				Component.translatable(getMode().getTranslationKey())).withStyle(ChatFormatting.GRAY));
+		tooltip.add(Component.translatable(Embers.MODID + ".turngear.control_mode_value",
+				Component.translatable(getFireControl().getTranslationKey())).withStyle(ChatFormatting.GRAY));
 		if (getMode() == Mode.LINKED) {
 			tooltip.add(Component.translatable(Embers.MODID + ".turngear.link_count",
 					level != null && level.isClientSide ? syncedLinkedSightstoneCount : linkedSightstones.size(),
@@ -560,6 +590,80 @@ public class CaminiteTurngearBlockEntity extends KineticBlockEntity
 		@Override
 		public String getTranslationKey() {
 			return Embers.MODID + ".turngear.mode." + name;
+		}
+	}
+
+	public enum FireControl implements INamedIconOptions {
+		AUTO(AllIcons.I_PLAY, "auto"),
+		REDSTONE(AllIcons.I_ACTIVE, "redstone");
+
+		private final AllIcons icon;
+		private final String name;
+
+		FireControl(AllIcons icon, String name) {
+			this.icon = icon;
+			this.name = name;
+		}
+
+		@Override
+		public AllIcons getIcon() {
+			return icon;
+		}
+
+		@Override
+		public String getTranslationKey() {
+			return Embers.MODID + ".turngear.control_mode." + name;
+		}
+	}
+
+	private static class FireControlBehaviour extends ScrollOptionBehaviour<FireControl> {
+		private static final BehaviourType<FireControlBehaviour> TYPE = new BehaviourType<>();
+		private static final String NBT_KEY = "TurngearFireControl";
+
+		FireControlBehaviour(CaminiteTurngearBlockEntity blockEntity, TurngearValueBoxTransform transform) {
+			super(FireControl.class, Component.translatable(Embers.MODID + ".turngear.control_mode"),
+					blockEntity, transform);
+		}
+
+		@Override
+		public BehaviourType<?> getType() {
+			return TYPE;
+		}
+
+		@Override
+		public int netId() {
+			return 1;
+		}
+
+		@Override
+		public void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
+			tag.putInt(NBT_KEY, value);
+		}
+
+		@Override
+		public void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
+			value = tag.contains(NBT_KEY, Tag.TAG_INT)
+					? Mth.clamp(tag.getInt(NBT_KEY), 0, FireControl.values().length - 1)
+					: 0;
+		}
+	}
+
+	private static class TurngearValueBoxTransform extends CenteredSideValueBoxTransform {
+		private final double horizontalCenter;
+
+		TurngearValueBoxTransform(double horizontalCenter) {
+			super((state, side) -> side.getAxis().isHorizontal());
+			this.horizontalCenter = horizontalCenter;
+		}
+
+		@Override
+		protected Vec3 getSouthLocation() {
+			return new Vec3(horizontalCenter / 16.0D, 0.5D, 15.5D / 16.0D);
+		}
+
+		@Override
+		public float getScale() {
+			return 0.4F;
 		}
 	}
 }

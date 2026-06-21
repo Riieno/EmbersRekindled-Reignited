@@ -13,6 +13,7 @@ import com.rekindled.embers.entity.EmberPacketEntity;
 import com.rekindled.embers.compat.sublevel.SubLevelCompat;
 import com.rekindled.embers.particle.StarParticleOptions;
 import com.rekindled.embers.util.EmbersColors;
+import com.rekindled.embers.util.SubLevelParticleUtil;
 import com.rekindled.embers.util.Misc;
 
 import net.minecraft.core.BlockPos;
@@ -102,7 +103,7 @@ public class EmberRelayBlockEntity extends BlockEntity implements IEmberPacketPr
 			((ServerLevel) level).getChunkSource().blockChanged(worldPosition);
 		if (trajectoryChunks == null)
 			trajectoryChunks = new HashSet<ChunkPos>();
-		Misc.calculateTrajectoryChunks(trajectoryChunks, worldPosition, target, getEmittingDirection(level.getBlockState(worldPosition).getValue(BlockStateProperties.FACING).getOpposite()));
+		Misc.calculateTrajectoryChunks(trajectoryChunks, worldPosition, target, getEmittingDirection(getBlockState().getValue(BlockStateProperties.FACING).getOpposite()));
 	}
 
 	@Override
@@ -110,7 +111,7 @@ public class EmberRelayBlockEntity extends BlockEntity implements IEmberPacketPr
 		refreshTrackedTarget();
 		if (trajectoryChunks == null) {
 			trajectoryChunks = new HashSet<ChunkPos>();
-			Misc.calculateTrajectoryChunks(trajectoryChunks, worldPosition, target, getEmittingDirection(level.getBlockState(worldPosition).getValue(BlockStateProperties.FACING).getOpposite()));
+			Misc.calculateTrajectoryChunks(trajectoryChunks, worldPosition, target, getEmittingDirection(getBlockState().getValue(BlockStateProperties.FACING).getOpposite()));
 		}
 		if (polled)
 			return target != null;
@@ -139,7 +140,7 @@ public class EmberRelayBlockEntity extends BlockEntity implements IEmberPacketPr
 		BlockEntity targetTile = target == null ? null : SubLevelCompat.findReachableLinkedTarget(this, target, targetSubLevelId, targetPhysicalPosition);
 		if (targetTile instanceof IEmberPacketReceiver targetBE && targetBE.hasRoomFor(packet.value) && !getBlockPos().equals(packet.pos)) {
 			if (level instanceof ServerLevel serverLevel) {
-				serverLevel.sendParticles(new StarParticleOptions(EmbersColors.EMBER_ID, 3.5f + 0.5f * random.nextFloat()), getBlockPos().getX() + 0.5, getBlockPos().getY() + 0.5, getBlockPos().getZ() + 0.5, 12, 0.0125f * (random.nextFloat() - 0.5f), 0.0125f * (random.nextFloat() - 0.5f), 0.0125f * (random.nextFloat() - 0.5f), 0.0);
+				SubLevelParticleUtil.send(this, new StarParticleOptions(EmbersColors.EMBER_ID, 3.5f + 0.5f * random.nextFloat()), getBlockPos().getX() + 0.5, getBlockPos().getY() + 0.5, getBlockPos().getZ() + 0.5, 12, 0.0125f * (random.nextFloat() - 0.5f), 0.0125f * (random.nextFloat() - 0.5f), 0.0125f * (random.nextFloat() - 0.5f), 0.0);
 			}
 			packet.setLifetime(78);
 			Vec3 destination = SubLevelCompat.currentTrackedPhysicalPosition(this, target, targetSubLevelId, targetPhysicalPosition);
@@ -192,7 +193,7 @@ public class EmberRelayBlockEntity extends BlockEntity implements IEmberPacketPr
 
 	@Override
 	public BlockPos getTarget(Direction side) {
-		BlockState state = level.getBlockState(worldPosition);
+		BlockState state = getBlockState();
 		if (state.hasProperty(BlockStateProperties.FACING)) {
 			Direction facing = state.getValue(BlockStateProperties.FACING);
 			if (side != facing)

@@ -13,6 +13,8 @@ import com.rekindled.embers.particle.VaporParticleOptions;
 import com.rekindled.embers.recipe.IGaseousFuelRecipe;
 import com.rekindled.embers.upgrade.WildfireStirlingUpgrade;
 import com.rekindled.embers.util.EmbersColors;
+import com.rekindled.embers.compat.sublevel.SubLevelCompat;
+import com.rekindled.embers.util.SubLevelParticleUtil;
 import com.rekindled.embers.util.sound.ISoundController;
 
 import net.minecraft.core.BlockPos;
@@ -144,7 +146,7 @@ public class WildfireStirlingBlockEntity extends BlockEntity implements ISoundCo
 				float motiony = (y2 - y1) / lifetime;
 				float motionz = (z2 - z1) / lifetime;
 
-				level.addParticle(new VaporParticleOptions(EmbersColors.EMBER_ID, new Vec3(motionx, motiony, motionz), lifetime / 16.0f), x1, y1, z1, 0, 0, 0);
+				SubLevelParticleUtil.add(blockEntity, new VaporParticleOptions(EmbersColors.EMBER_ID, SubLevelCompat.toPhysicalDirection(blockEntity, new Vec3(motionx, motiony, motionz)), lifetime / 16.0f), x1, y1, z1, 0, 0, 0);
 			}
 			float x = pos.getX() + (float) frontOffset.x;
 			float y = pos.getY() + (float) frontOffset.y;
@@ -154,7 +156,7 @@ public class WildfireStirlingBlockEntity extends BlockEntity implements ISoundCo
 			float motiony = (Math.abs(facing.getNormal().getY()) - 1) * (random.nextFloat()-0.5f) * 2 * wideoffset / lifetime;
 			float motionz = (Math.abs(facing.getNormal().getZ()) - 1) * (random.nextFloat()-0.5f) * 2 * wideoffset / lifetime;
 
-			level.addParticle(new VaporParticleOptions(EmbersColors.EMBER_ID, new Vec3(motionx, motiony, motionz), lifetime / 16.0f), x, y, z, 0, 0, 0);
+			SubLevelParticleUtil.add(blockEntity, new VaporParticleOptions(EmbersColors.EMBER_ID, SubLevelCompat.toPhysicalDirection(blockEntity, new Vec3(motionx, motiony, motionz)), lifetime / 16.0f), x, y, z, 0, 0, 0);
 		}
 	}
 

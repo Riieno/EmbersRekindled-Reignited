@@ -101,7 +101,7 @@ public class MirrorRelayBlockEntity extends BlockEntity implements IEmberPacketP
 			((ServerLevel) level).getChunkSource().blockChanged(worldPosition);
 		if (trajectoryChunks == null)
 			trajectoryChunks = new HashSet<ChunkPos>();
-		Misc.calculateTrajectoryChunks(trajectoryChunks, worldPosition, target, getEmittingDirection(level.getBlockState(worldPosition).getValue(BlockStateProperties.FACING)));
+		Misc.calculateTrajectoryChunks(trajectoryChunks, worldPosition, target, getEmittingDirection(getBlockState().getValue(BlockStateProperties.FACING)));
 	}
 
 	@Override
@@ -109,7 +109,7 @@ public class MirrorRelayBlockEntity extends BlockEntity implements IEmberPacketP
 		refreshTrackedTarget();
 		if (trajectoryChunks == null) {
 			trajectoryChunks = new HashSet<ChunkPos>();
-			Misc.calculateTrajectoryChunks(trajectoryChunks, worldPosition, target, getEmittingDirection(level.getBlockState(worldPosition).getValue(BlockStateProperties.FACING)));
+			Misc.calculateTrajectoryChunks(trajectoryChunks, worldPosition, target, getEmittingDirection(getBlockState().getValue(BlockStateProperties.FACING)));
 		}
 		if (polled)
 			return target != null;
@@ -137,7 +137,7 @@ public class MirrorRelayBlockEntity extends BlockEntity implements IEmberPacketP
 		refreshTrackedTarget();
 		BlockEntity targetTile = target == null ? null : SubLevelCompat.findReachableLinkedTarget(this, target, targetSubLevelId, targetPhysicalPosition);
 		if (targetTile instanceof IEmberPacketReceiver targetBE && targetBE.hasRoomFor(packet.value) && !getBlockPos().equals(packet.pos)) {
-			Axis axis = level.getBlockState(worldPosition).getValue(BlockStateProperties.FACING).getAxis();
+			Axis axis = getBlockState().getValue(BlockStateProperties.FACING).getAxis();
 			packet.setLifetime(78);
 			Vec3 destination = SubLevelCompat.currentTrackedPhysicalPosition(this, target, targetSubLevelId, targetPhysicalPosition);
 			packet.dest = BlockPos.containing(destination);
@@ -155,7 +155,7 @@ public class MirrorRelayBlockEntity extends BlockEntity implements IEmberPacketP
 
 	@Override
 	public void setIncomingDirection(Vec3 direction) {
-		Axis axis = level.getBlockState(worldPosition).getValue(BlockStateProperties.FACING).getAxis();
+		Axis axis = getBlockState().getValue(BlockStateProperties.FACING).getAxis();
 		incomingDirection = direction.multiply(axis == Axis.X ? -1.7 : 1.7, axis == Axis.Y ? -1.7 : 1.7, axis == Axis.Z ? -1.7 : 1.7);
 		this.setChanged();
 	}
@@ -186,13 +186,13 @@ public class MirrorRelayBlockEntity extends BlockEntity implements IEmberPacketP
 	@Override
 	public Vec3 getEmittingDirection(Direction side) {
 		if (incomingDirection.equals(Vec3.ZERO))
-			return EmberEmitterBlockEntity.getBurstVelocity(level.getBlockState(worldPosition).getValue(BlockStateProperties.FACING));
+			return EmberEmitterBlockEntity.getBurstVelocity(getBlockState().getValue(BlockStateProperties.FACING));
 		return incomingDirection;
 	}
 
 	@Override
 	public BlockPos getTarget(Direction side) {
-		BlockState state = level.getBlockState(worldPosition);
+		BlockState state = getBlockState();
 		if (state.hasProperty(BlockStateProperties.FACING)) {
 			Direction facing = state.getValue(BlockStateProperties.FACING);
 			if (side != facing)

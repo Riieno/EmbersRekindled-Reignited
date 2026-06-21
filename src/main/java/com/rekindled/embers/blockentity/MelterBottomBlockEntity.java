@@ -23,6 +23,7 @@ import com.rekindled.embers.recipe.IMeltingRecipe;
 import com.rekindled.embers.upgrade.GeologicSeparatorUpgrade;
 import com.rekindled.embers.util.EmbersColors;
 import com.rekindled.embers.util.Misc;
+import com.rekindled.embers.util.SubLevelParticleUtil;
 import com.rekindled.embers.util.sound.ISoundController;
 
 import net.minecraft.core.BlockPos;
@@ -129,10 +130,10 @@ public class MelterBottomBlockEntity extends BlockEntity implements ISoundContro
 
 					if (level instanceof ServerLevel serverLevel) {
 						if (random.nextInt(20) == 0) {
-							serverLevel.sendParticles(new SparkParticleOptions(EmbersColors.EMBER_ID, random.nextFloat() + 0.45f), pos.getX() + 0.5f, pos.getY() + 1.85f, pos.getZ() + 0.5f, 1, 0.125, 0.0, 0.125, 1.0);
+							SubLevelParticleUtil.send(blockEntity, new SparkParticleOptions(EmbersColors.EMBER_ID, random.nextFloat() + 0.45f), pos.getX() + 0.5f, pos.getY() + 1.85f, pos.getZ() + 0.5f, 1, 0.125, 0.0, 0.125, 1.0);
 						}
 						if (random.nextInt(10) == 0) {
-							serverLevel.sendParticles(new SmokeParticleOptions(EmbersColors.SMOKE_ID, 4.0f), pos.getX() + 0.5f, pos.getY() + 1.5f, pos.getZ() + 0.5f, 12, 0.125, 0.125, 0.125, 1.0);
+							SubLevelParticleUtil.send(blockEntity, new SmokeParticleOptions(EmbersColors.SMOKE_ID, 4.0f), pos.getX() + 0.5f, pos.getY() + 1.5f, pos.getZ() + 0.5f, 12, 0.125, 0.125, 0.125, 1.0);
 						}
 					}
 

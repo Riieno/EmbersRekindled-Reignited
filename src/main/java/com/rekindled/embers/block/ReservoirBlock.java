@@ -81,7 +81,7 @@ public class ReservoirBlock extends EmbersEntityBlock implements SimpleWaterlogg
 
 	@Override
 	public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
-		if (!state.is(newState.getBlock())) {
+		if (!isMoving && !state.is(newState.getBlock())) {
 			for (MechEdge edge : MechEdge.values()) {
 				BlockPos cornerPos = pos.subtract(edge.centerPos);
 				if (level.getBlockState(cornerPos).getBlock() instanceof MechEdgeBlockBase) {

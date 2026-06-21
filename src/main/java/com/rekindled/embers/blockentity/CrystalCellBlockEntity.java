@@ -23,6 +23,8 @@ import com.rekindled.embers.recipe.IEmberActivationRecipe;
 import com.rekindled.embers.recipe.SingleItemContainer;
 import com.rekindled.embers.util.EmbersColors;
 import com.rekindled.embers.util.Misc;
+import com.rekindled.embers.compat.sublevel.SubLevelCompat;
+import com.rekindled.embers.util.SubLevelParticleUtil;
 import com.rekindled.embers.util.sound.ISoundController;
 
 import net.minecraft.core.BlockPos;
@@ -162,7 +164,7 @@ public class CrystalCellBlockEntity extends BlockEntity implements ISoundControl
 							blockEntity.capability.setEmberCapacity(Math.min(maxCapacity, blockEntity.capability.getEmberCapacity() + emberValue * 10));
 							blockEntity.setChanged();
 						}
-						PacketHandler.sendTrackingChunk((ServerLevel) level, level.getChunkAt(pos).getPos(), new MessageCrystalCellGrowFX(pos, blockEntity.capability.getEmberCapacity()));
+						PacketHandler.sendToAll(new MessageCrystalCellGrowFX(pos, blockEntity.capability.getEmberCapacity()));
 					}
 				}
 			}
@@ -178,7 +180,11 @@ public class CrystalCellBlockEntity extends BlockEntity implements ISoundControl
 				float x = pos.getX() + 0.5f + 2.0f * (blockEntity.random.nextFloat() - 0.5f);
 				float z = pos.getZ() + 0.5f + 2.0f * (blockEntity.random.nextFloat() - 0.5f);
 				float y = pos.getY() + 1.0f;
-				level.addParticle(new GlowParticleOptions(EmbersColors.EMBER_ID, new Vec3((xDest - x) / 1.0f * blockEntity.random.nextFloat(), (yDest - y) / 1.0f * blockEntity.random.nextFloat(), (zDest - z) / 1.0f * blockEntity.random.nextFloat()), 2.0F), x, y, z, 0, 0, 0);
+				Vec3 localPosition = new Vec3(x, y, z);
+				Vec3 physicalPosition = SubLevelCompat.toPhysicalPosition(blockEntity, localPosition);
+				Vec3 physicalDestination = SubLevelCompat.toPhysicalPosition(blockEntity, new Vec3(xDest, yDest, zDest));
+				Vec3 motion = physicalDestination.subtract(physicalPosition).scale(blockEntity.random.nextFloat());
+				SubLevelParticleUtil.add(blockEntity, new GlowParticleOptions(EmbersColors.EMBER_ID, motion, 2.0F), x, y, z, 0, 0, 0);
 			}
 		}
 	}

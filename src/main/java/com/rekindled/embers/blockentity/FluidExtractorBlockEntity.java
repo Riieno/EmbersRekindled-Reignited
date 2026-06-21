@@ -13,6 +13,8 @@ import com.rekindled.embers.RegistryManager;
 import com.rekindled.embers.api.tile.IExtraCapabilityInformation;
 import com.rekindled.embers.particle.VaporParticleOptions;
 import com.rekindled.embers.util.EmbersColors;
+import com.rekindled.embers.compat.sublevel.SubLevelCompat;
+import com.rekindled.embers.util.SubLevelParticleUtil;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -102,7 +104,7 @@ public class FluidExtractorBlockEntity extends FluidPipeBlockEntityBase implemen
 			float vx = xOffset * speed + posRand.nextFloat() * speed * 0.3f;
 			float vy = yOffset * speed + posRand.nextFloat() * speed * 0.3f;
 			float vz = zOffset * speed + posRand.nextFloat() * speed * 0.3f;
-			((ServerLevel) level).sendParticles(new VaporParticleOptions(EmbersColors.VAPOR_ID, new Vec3(vx, vy, vz), 1.0f), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 4, 0, 0, 0, 1.0);
+			SubLevelParticleUtil.send(blockEntity, new VaporParticleOptions(EmbersColors.VAPOR_ID, SubLevelCompat.toPhysicalDirection(blockEntity, new Vec3(vx, vy, vz)), 1.0f), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 4, 0, 0, 0, 1.0);
 		}
 		blockEntity.active = ConfigManager.isRedstoneControlActive(level, pos);
 		boolean moved = blockEntity.routeBufferedFluid();

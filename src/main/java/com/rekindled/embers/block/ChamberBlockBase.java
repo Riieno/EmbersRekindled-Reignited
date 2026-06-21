@@ -51,7 +51,7 @@ public abstract class ChamberBlockBase extends EmbersEntityBlock implements Simp
 
 	@Override
 	public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
-		if (!state.is(newState.getBlock())) {
+		if (!isMoving && !state.is(newState.getBlock())) {
 			if (state.getValue(CONNECTION) == ChamberConnection.BOTTOM) {
 				BlockState above = level.getBlockState(pos.above());
 				if (above.getBlock() == this && above.getValue(CONNECTION) != ChamberConnection.BOTTOM)

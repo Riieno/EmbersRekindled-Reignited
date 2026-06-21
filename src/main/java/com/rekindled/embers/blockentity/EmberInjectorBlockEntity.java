@@ -21,6 +21,7 @@ import com.rekindled.embers.particle.GlowParticleOptions;
 import com.rekindled.embers.power.DefaultEmberCapability;
 import com.rekindled.embers.compat.sublevel.SubLevelCompat;
 import com.rekindled.embers.util.EmbersColors;
+import com.rekindled.embers.util.SubLevelParticleUtil;
 import com.rekindled.embers.util.sound.ISoundController;
 
 import net.minecraft.core.BlockPos;
@@ -104,7 +105,7 @@ public class EmberInjectorBlockEntity extends BlockEntity implements ISoundContr
 		if (blockEntity.isWorking) {
 			Direction facing = state.getValue(BlockStateProperties.FACING);
 			for (int i = 0; i < 6 * blockEntity.distance; i++) {
-				level.addParticle(new GlowParticleOptions(EmbersColors.EMBER_ID, 4.0F),
+				SubLevelParticleUtil.add(blockEntity, new GlowParticleOptions(EmbersColors.EMBER_ID, 4.0F),
 						pos.getX()+0.5f+random.nextFloat()*blockEntity.distance*facing.getNormal().getX(),
 						pos.getY()+0.5f+random.nextFloat()*blockEntity.distance*facing.getNormal().getY(),
 						pos.getZ()+0.5f+random.nextFloat()*blockEntity.distance*facing.getNormal().getZ(), 0, 0, 0);

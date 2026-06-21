@@ -30,6 +30,7 @@ import com.rekindled.embers.recipe.SingleItemContainer;
 import com.rekindled.embers.util.DecimalFormats;
 import com.rekindled.embers.util.EmbersColors;
 import com.rekindled.embers.util.Misc;
+import com.rekindled.embers.util.SubLevelParticleUtil;
 import com.rekindled.embers.util.sound.ISoundController;
 
 import net.minecraft.core.BlockPos;
@@ -186,7 +187,7 @@ public class IgnemReactorBlockEntity extends BlockEntity implements ISoundContro
 				float vx = (float) Mth.clampedLerp(0, (random.nextFloat() - 0.5) * 0.1f, catalyzerRatio);
 				float vy = (float) Mth.clampedLerp(random.nextFloat() * 0.05f, (random.nextFloat() - 0.5) * 0.2f, catalyzerRatio);
 				float vz = (float) Mth.clampedLerp(0, (random.nextFloat() - 0.5) * 0.1f, catalyzerRatio);
-				level.addParticle(options, pos.getX()+0.25f+random.nextFloat()*0.5f, pos.getY()+0.25f+random.nextFloat()*0.5f, pos.getZ()+0.25f+random.nextFloat()*0.5f, vx, vy, vz);
+				SubLevelParticleUtil.add(blockEntity, options, pos.getX()+0.25f+random.nextFloat()*0.5f, pos.getY()+0.25f+random.nextFloat()*0.5f, pos.getZ()+0.25f+random.nextFloat()*0.5f, vx, vy, vz);
 			}
 		}
 	}
@@ -224,8 +225,8 @@ public class IgnemReactorBlockEntity extends BlockEntity implements ISoundContro
 							if (ember > 0 && blockEntity.capability.getEmber() + ember <= blockEntity.capability.getEmberCapacity()) {
 								level.playSound(null, pos, EmbersSounds.IGNEM_REACTOR.get(), SoundSource.BLOCKS, 1.0f, 1.0f);
 								if (level instanceof ServerLevel serverLevel) {
-									serverLevel.sendParticles(new GlowParticleOptions(EmbersColors.EMBER_ID, new Vec3(0, 0.65f, 0), 4.7f), pos.getX() + 0.5f, pos.getY() + 0.5f, pos.getZ() + 0.5f, 80, 0.1, 0.1, 0.1, 1.0);
-									serverLevel.sendParticles(new SmokeParticleOptions(EmbersColors.SMOKE_ID, 5.0f), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 20, 0.1, 0.1, 0.1, 1.0);
+									SubLevelParticleUtil.send(blockEntity, new GlowParticleOptions(EmbersColors.EMBER_ID, new Vec3(0, 0.65f, 0), 4.7f), pos.getX() + 0.5f, pos.getY() + 0.5f, pos.getZ() + 0.5f, 80, 0.1, 0.1, 0.1, 1.0);
+									SubLevelParticleUtil.send(blockEntity, new SmokeParticleOptions(EmbersColors.SMOKE_ID, 5.0f), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 20, 0.1, 0.1, 0.1, 1.0);
 								}
 								UpgradeUtil.throwEvent(blockEntity, new EmberEvent(blockEntity, EmberEvent.EnumType.PRODUCE, ember), blockEntity.upgrades);
 								blockEntity.capability.addAmount(ember, true);

@@ -37,7 +37,7 @@ public class AnvilRepairMateriaRecipe implements IDawnstoneAnvilRecipe, IVisuall
 	@Override
 	public boolean matches(RecipeInput context, Level pLevel) {
 		ItemStack tool = context.getItem(0);
-		return tool.isRepairable() && tool.isDamaged() && !blacklist.test(tool) && materia.test(context.getItem(1));
+		return tool.isDamageableItem() && tool.isDamaged() && !blacklist.test(tool) && materia.test(context.getItem(1));
 	}
 
 	@Override
@@ -52,7 +52,7 @@ public class AnvilRepairMateriaRecipe implements IDawnstoneAnvilRecipe, IVisuall
 		visualRecipes.clear();
 		for (Holder<Item> holder : BuiltInRegistries.ITEM.asHolderIdMap()) {
 			ItemStack toolStack = new ItemStack(holder.value());
-			if (toolStack.isRepairable() && !blacklist.test(toolStack)) {
+			if (toolStack.isDamageableItem() && !blacklist.test(toolStack)) {
 				ItemStack brokenTool = toolStack.copy();
 				brokenTool.setDamageValue(brokenTool.getMaxDamage() / 2);
 				visualRecipes.add(new AnvilDisplayRecipe(id, List.of(toolStack), List.of(brokenTool), materia));

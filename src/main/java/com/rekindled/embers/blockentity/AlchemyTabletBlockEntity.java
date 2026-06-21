@@ -28,6 +28,7 @@ import com.rekindled.embers.recipe.IAlchemyRecipe;
 import com.rekindled.embers.recipe.IAlchemyRecipe.PedestalContents;
 import com.rekindled.embers.util.EmbersColors;
 import com.rekindled.embers.util.Misc;
+import com.rekindled.embers.util.SubLevelParticleUtil;
 import com.rekindled.embers.util.sound.ISoundController;
 
 import net.minecraft.core.BlockPos;
@@ -165,13 +166,13 @@ public class AlchemyTabletBlockEntity extends BlockEntity implements ISparkable,
 			for (AlchemyPedestalTopBlockEntity pedestal : pedestals) {
 				pedestal.setActive(3);
 
-				level.addParticle(StarParticleOptions.EMBER, pedestal.getBlockPos().getX() + 0.5f, pedestal.getBlockPos().getY() + 0.75f, pedestal.getBlockPos().getZ() + 0.5f, 0, 0.00001, 0);
+				SubLevelParticleUtil.add(pedestal, StarParticleOptions.EMBER, pedestal.getBlockPos().getX() + 0.5f, pedestal.getBlockPos().getY() + 0.75f, pedestal.getBlockPos().getZ() + 0.5f, 0, 0.00001, 0);
 				for (int j = 0; j < 16; j++) {
 					float coeff = rand.nextFloat();
 					float x = (pos.getX() + 0.5f) * coeff + (1.0f - coeff) * (pedestal.getBlockPos().getX() + 0.5f);
 					float y = (pos.getY() + 0.875f) * coeff + (1.0f - coeff) * (pedestal.getBlockPos().getY() + 0.75f);
 					float z = (pos.getZ() + 0.5f) * coeff + (1.0f - coeff) * (pedestal.getBlockPos().getZ() + 0.5f);
-					level.addParticle(GlowParticleOptions.EMBER, x, y, z, 0, 0.00001, 0);
+					SubLevelParticleUtil.add(blockEntity, GlowParticleOptions.EMBER, x, y, z, 0, 0.00001, 0);
 				}
 			}
 
@@ -182,7 +183,7 @@ public class AlchemyTabletBlockEntity extends BlockEntity implements ISparkable,
 				float dz = (pos.getZ() + 0.5f) - (pedestal.getBlockPos().getZ() + 0.5f);
 				float speed = 0.5f;
 				for (int j = 0; j < 20; j++) {
-					level.addParticle(StarParticleOptions.EMBER, pedestal.getBlockPos().getX() + 0.5f, pedestal.getBlockPos().getY() + 0.75f, pedestal.getBlockPos().getZ() + 0.5f, dx * speed, dy * speed, dz * speed);
+					SubLevelParticleUtil.add(pedestal, StarParticleOptions.EMBER, pedestal.getBlockPos().getX() + 0.5f, pedestal.getBlockPos().getY() + 0.75f, pedestal.getBlockPos().getZ() + 0.5f, dx * speed, dy * speed, dz * speed);
 				}
 			}
 		} else if (blockEntity.progress == 0) {
@@ -229,7 +230,7 @@ public class AlchemyTabletBlockEntity extends BlockEntity implements ISparkable,
 							}
 						}
 
-						((ServerLevel) level).sendParticles(new GlowParticleOptions(EmbersColors.EMBER_ID, 4.0f), pos.getX() + 0.5f, pos.getY() + 0.875, pos.getZ() + 0.5f, 24, 0.1, 0.1, 0.1, 0.5);
+						SubLevelParticleUtil.send(blockEntity, new GlowParticleOptions(EmbersColors.EMBER_ID, 4.0f), pos.getX() + 0.5f, pos.getY() + 0.875, pos.getZ() + 0.5f, 24, 0.1, 0.1, 0.1, 0.5);
 
 						blockEntity.progress = 0;
 
@@ -291,7 +292,7 @@ public class AlchemyTabletBlockEntity extends BlockEntity implements ISparkable,
 
 		if (event.getRecipe() != null) {
 			int time = UpgradeUtil.getWorkTime(this, PROCESSING_TIME * 10, upgrades);
-			((ServerLevel) level).sendParticles(new AlchemyCircleParticleOptions(EmbersColors.EMBER_ID, 1.0F, time + 20), worldPosition.getX() + 0.5, worldPosition.getY() + 1.01, worldPosition.getZ() + 0.5, 5, 0, 0, 0, 1);
+			SubLevelParticleUtil.send(this, new AlchemyCircleParticleOptions(EmbersColors.EMBER_ID, 1.0F, time + 20), worldPosition.getX() + 0.5, worldPosition.getY() + 1.01, worldPosition.getZ() + 0.5, 5, 0, 0, 0, 1);
 			progress = 1;
 			setChanged();
 			level.playSound(null, worldPosition, EmbersSounds.ALCHEMY_START.get(), SoundSource.BLOCKS, 1.0f, 1.0f);

@@ -1,6 +1,8 @@
 {
   "values": [
     "#c:tools",
+    "#c:tools/melee_weapon",
+    "#c:tools/ranged_weapon",
     "#minecraft:tools",
     {
       "id": "weaponmaster:wm_broadsword",

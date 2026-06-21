@@ -34,6 +34,7 @@ import com.rekindled.embers.recipe.SingleItemContainer;
 import com.rekindled.embers.util.DecimalFormats;
 import com.rekindled.embers.util.EmbersColors;
 import com.rekindled.embers.util.Misc;
+import com.rekindled.embers.util.SubLevelParticleUtil;
 import com.rekindled.embers.util.sound.ISoundController;
 
 import net.minecraft.core.BlockPos;
@@ -252,7 +253,7 @@ public class HearthCoilBlockEntity extends BlockEntity implements ISoundControll
 			Vector3f color = event.getColor();
 			GlowParticleOptions options = new GlowParticleOptions(color, 2.0F);
 			for (int i = 0; i < event.getParticles(); i ++) {
-				level.addParticle(options, pos.getX()-0.2f+random.nextFloat()*1.4f, pos.getY()+1.275f, pos.getZ()-0.2f+random.nextFloat()*1.4f,
+				SubLevelParticleUtil.add(blockEntity, options, pos.getX()-0.2f+random.nextFloat()*1.4f, pos.getY()+1.275f, pos.getZ()-0.2f+random.nextFloat()*1.4f,
 						(Math.random() * 2.0D - 1.0D) * 0.2D, random.nextFloat() * event.getVerticalSpeed(), (Math.random() * 2.0D - 1.0D) * 0.2D);
 			}
 		}

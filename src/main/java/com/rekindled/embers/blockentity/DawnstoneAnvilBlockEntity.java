@@ -12,6 +12,7 @@ import com.rekindled.embers.particle.SparkParticleOptions;
 import com.rekindled.embers.recipe.IDawnstoneAnvilRecipe;
 import com.rekindled.embers.util.EmbersColors;
 import com.rekindled.embers.util.Misc;
+import com.rekindled.embers.util.SubLevelParticleUtil;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -132,13 +133,13 @@ public class DawnstoneAnvilBlockEntity extends BlockEntity implements IHammerabl
 				inventory.setStackInSlot(1, ItemStack.EMPTY);
 
 				if (level instanceof ServerLevel serverLevel) {
-					serverLevel.sendParticles(new SparkParticleOptions(EmbersColors.EMBER_ID, 1.0f), worldPosition.getX() + 0.5f, worldPosition.getY() + 1.0625f, worldPosition.getZ() + 0.5f, 10, 0.1, 0.0, 0.1, 1.0);
-					serverLevel.sendParticles(new SmokeParticleOptions(EmbersColors.SMOKE_ID, 3.0f), worldPosition.getX() + 0.5f, worldPosition.getY() + 1.0625f, worldPosition.getZ() + 0.5f, 10, 0.1, 0.0, 0.1, 1.0);
+					SubLevelParticleUtil.send(this, new SparkParticleOptions(EmbersColors.EMBER_ID, 1.0f), worldPosition.getX() + 0.5f, worldPosition.getY() + 1.0625f, worldPosition.getZ() + 0.5f, 10, 0.1, 0.0, 0.1, 1.0);
+					SubLevelParticleUtil.send(this, new SmokeParticleOptions(EmbersColors.SMOKE_ID, 3.0f), worldPosition.getX() + 0.5f, worldPosition.getY() + 1.0625f, worldPosition.getZ() + 0.5f, 10, 0.1, 0.0, 0.1, 1.0);
 				}
 				level.playSound(null, worldPosition, SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 1.0f, 0.95f+random.nextFloat()*0.1f);
 			} else if (level instanceof ServerLevel serverLevel) {
 				setChanged();
-				serverLevel.sendParticles(new SparkParticleOptions(EmbersColors.EMBER_ID, 1.0f), worldPosition.getX() + 0.5f, worldPosition.getY() + 1.0625f, worldPosition.getZ() + 0.5f, 1, 0.02, 0.0, 0.02, 1.0);
+				SubLevelParticleUtil.send(this, new SparkParticleOptions(EmbersColors.EMBER_ID, 1.0f), worldPosition.getX() + 0.5f, worldPosition.getY() + 1.0625f, worldPosition.getZ() + 0.5f, 1, 0.02, 0.0, 0.02, 1.0);
 			}
 			return true;
 		}

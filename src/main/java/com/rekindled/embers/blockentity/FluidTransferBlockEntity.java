@@ -6,6 +6,8 @@ import java.util.Random;
 import com.rekindled.embers.RegistryManager;
 import com.rekindled.embers.particle.VaporParticleOptions;
 import com.rekindled.embers.util.EmbersColors;
+import com.rekindled.embers.compat.sublevel.SubLevelCompat;
+import com.rekindled.embers.util.SubLevelParticleUtil;
 import com.rekindled.embers.util.Misc;
 
 import net.minecraft.core.BlockPos;
@@ -164,7 +166,7 @@ public class FluidTransferBlockEntity extends FluidPipeBlockEntityBase {
 			float vx = xOffset * speed + posRand.nextFloat() * speed * 0.3f;
 			float vy = yOffset * speed + posRand.nextFloat() * speed * 0.3f;
 			float vz = zOffset * speed + posRand.nextFloat() * speed * 0.3f;
-			((ServerLevel) level).sendParticles(new VaporParticleOptions(EmbersColors.VAPOR_ID, new Vec3(vx, vy, vz), 1.0f), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 4, 0, 0, 0, 1.0);
+			SubLevelParticleUtil.send(blockEntity, new VaporParticleOptions(EmbersColors.VAPOR_ID, SubLevelCompat.toPhysicalDirection(blockEntity, new Vec3(vx, vy, vz)), 1.0f), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 4, 0, 0, 0, 1.0);
 		}
 		FluidPipeBlockEntityBase.serverTick(level, pos, state, blockEntity);
 	}

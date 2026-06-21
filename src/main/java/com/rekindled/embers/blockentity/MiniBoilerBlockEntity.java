@@ -22,6 +22,8 @@ import com.rekindled.embers.recipe.FluidHandlerContext;
 import com.rekindled.embers.recipe.IBoilingRecipe;
 import com.rekindled.embers.upgrade.MiniBoilerUpgrade;
 import com.rekindled.embers.util.Misc;
+import com.rekindled.embers.compat.sublevel.SubLevelCompat;
+import com.rekindled.embers.util.SubLevelParticleUtil;
 import com.rekindled.embers.util.sound.ISoundController;
 
 import net.minecraft.ChatFormatting;
@@ -302,7 +304,7 @@ public class MiniBoilerBlockEntity extends PipeBlockEntityBase implements ISound
 			float vx = xOffset * speed + posRand.nextFloat() * speed * 0.3f;
 			float vy = yOffset * speed + posRand.nextFloat() * speed * 0.3f;
 			float vz = zOffset * speed + posRand.nextFloat() * speed * 0.3f;
-			level.addParticle(new VaporParticleOptions(color, new Vec3(vx, vy, vz), 1.0F), worldPosition.getX() + 0.5, worldPosition.getY() + 0.5, worldPosition.getZ() + 0.5, 0, 0, 0);
+			SubLevelParticleUtil.add(this, new VaporParticleOptions(color, SubLevelCompat.toPhysicalDirection(this, new Vec3(vx, vy, vz)), 1.0F), worldPosition.getX() + 0.5, worldPosition.getY() + 0.5, worldPosition.getZ() + 0.5, 0, 0, 0);
 		}
 	}
 

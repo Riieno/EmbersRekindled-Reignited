@@ -15,6 +15,8 @@ import com.rekindled.embers.particle.VaporParticleOptions;
 import com.rekindled.embers.recipe.IGaseousFuelRecipe;
 import com.rekindled.embers.upgrade.CatalyticPlugUpgrade;
 import com.rekindled.embers.util.sound.ISoundController;
+import com.rekindled.embers.compat.sublevel.SubLevelCompat;
+import com.rekindled.embers.util.SubLevelParticleUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -151,7 +153,7 @@ public class CatalyticPlugBlockEntity extends BlockEntity implements ISoundContr
 				float motiony = planar.getNormal().getY() * 0.053f - facing.getNormal().getY() * 0.015f - 0.01f + random.nextFloat() * 0.02f;
 				float motionz = planar.getNormal().getZ() * 0.053f - facing.getNormal().getZ() * 0.015f - 0.01f + random.nextFloat() * 0.02f;
 
-				level.addParticle(new VaporParticleOptions(color, new Vec3(motionx, motiony, motionz), 1.25f), x, y, z, 0, 0, 0);
+				SubLevelParticleUtil.add(blockEntity, new VaporParticleOptions(color, SubLevelCompat.toPhysicalDirection(blockEntity, new Vec3(motionx, motiony, motionz)), 1.25f), x, y, z, 0, 0, 0);
 			}
 		}
 	}

@@ -11,6 +11,7 @@ import com.rekindled.embers.RegistryManager;
 import com.rekindled.embers.datagen.EmbersBlockTags;
 import com.rekindled.embers.particle.VaporParticleOptions;
 import com.rekindled.embers.util.Misc;
+import com.rekindled.embers.util.SubLevelParticleUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -159,7 +160,7 @@ public class ReservoirBlockEntity extends OpenTankBlockEntity {
 			float xOffset = 0.5f + (random.nextFloat() - 0.5f) * 2 * 0.2f;
 			float yOffset = height + 0.9f;
 			float zOffset = 0.5f + (random.nextFloat() - 0.5f) * 2 * 0.2f;
-			level.addParticle(new VaporParticleOptions(color, 2.0f), worldPosition.getX() + xOffset, worldPosition.getY() + yOffset, worldPosition.getZ() + zOffset, 0, 1 / 5f, 0);
+			SubLevelParticleUtil.add(this, new VaporParticleOptions(color, 2.0f), worldPosition.getX() + xOffset, worldPosition.getY() + yOffset, worldPosition.getZ() + zOffset, 0, 1 / 5f, 0);
 		}
 	}
 }

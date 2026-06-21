@@ -496,6 +496,11 @@ public class Misc {
 				Embers.LOGGER.error("Item: \"" + BuiltInRegistries.ITEM.getKey(item) + "\" has no proper tool tier, this is a bug and should be reported to " + BuiltInRegistries.ITEM.getKey(item).getNamespace(), e);
 			}
 		}
+		if (item instanceof net.minecraft.world.item.ArmorItem armor) {
+			Ingredient ingredient = armor.getMaterial().value().repairIngredient().get();
+			if (ingredient != null)
+				return ingredient;
+		}
 		return Ingredient.EMPTY;
 	}
 

@@ -6,6 +6,8 @@ import com.rekindled.embers.api.block.IPipeConnection;
 import com.rekindled.embers.block.PipeBlockBase;
 import com.rekindled.embers.particle.GlowParticleOptions;
 import com.rekindled.embers.util.EmbersColors;
+import com.rekindled.embers.compat.sublevel.SubLevelCompat;
+import com.rekindled.embers.util.SubLevelParticleUtil;
 import com.rekindled.embers.util.Misc;
 
 import net.minecraft.client.Minecraft;
@@ -187,7 +189,7 @@ public class PipeBlockEntityBase extends BlockEntity {
 			double y = pos.getY() + 0.4f + random.nextFloat() * 0.2f;
 			double z = pos.getZ() + 0.4f + random.nextFloat() * 0.2f;
 			for (int i = 0; i < 3; i++) {
-				level.addParticle(new GlowParticleOptions(blockEntity.clogged ? EmbersColors.PIPE_CLOGGED_ID : EmbersColors.PIPE_FLOWING_ID, new Vec3(vx, vy, vz), 2.0f), x, y, z, vx, vy, vz);
+				SubLevelParticleUtil.add(blockEntity, new GlowParticleOptions(blockEntity.clogged ? EmbersColors.PIPE_CLOGGED_ID : EmbersColors.PIPE_FLOWING_ID, SubLevelCompat.toPhysicalDirection(blockEntity, new Vec3(vx, vy, vz)), 2.0f), x, y, z, vx, vy, vz);
 			}
 		}
 	}

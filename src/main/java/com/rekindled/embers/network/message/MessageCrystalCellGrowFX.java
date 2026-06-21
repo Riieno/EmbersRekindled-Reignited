@@ -5,6 +5,8 @@ import java.util.Random;
 import com.rekindled.embers.blockentity.CrystalCellBlockEntity;
 import com.rekindled.embers.datagen.EmbersSounds;
 import com.rekindled.embers.particle.GlowParticleOptions;
+import com.rekindled.embers.compat.sublevel.SubLevelCompat;
+import com.rekindled.embers.util.SubLevelParticleUtil;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -61,7 +63,11 @@ public class MessageCrystalCellGrowFX {
 			BlockEntity blockEntity = level.getBlockEntity(msg.pos);
 			if (blockEntity instanceof CrystalCellBlockEntity crystalCell) {
 				crystalCell.capability.setEmberCapacity(msg.capacity);
+				spawnParticles(msg, crystalCell);
 			}
+		}
+
+		private static void spawnParticles(MessageCrystalCellGrowFX msg, CrystalCellBlockEntity crystalCell) {
 			double angle = random.nextDouble() * 2.0 * Math.PI;
 			double x = msg.pos.getX() + 0.5 + 0.5 * Math.sin(angle);
 			double z = msg.pos.getZ() + 0.5 + 0.5 * Math.cos(angle);
@@ -72,9 +78,13 @@ public class MessageCrystalCellGrowFX {
 			float height = layerHeight * numLayers;
 			for (float i = 0; i < 72; i++) {
 				float coeff = i / 72.0f;
-				level.addParticle(GlowParticleOptions.EMBER_NOMOTION, x * (1.0f - coeff) + x2 * coeff, msg.pos.getY() + (1.0f - coeff) + (height / 2.0f + 1.5f) * coeff, z * (1.0f - coeff) + z2 * coeff, 0, 0, 0);
+				SubLevelParticleUtil.add(crystalCell, GlowParticleOptions.EMBER_NOMOTION,
+						x * (1.0f - coeff) + x2 * coeff,
+						msg.pos.getY() + (1.0f - coeff) + (height / 2.0f + 1.5f) * coeff,
+						z * (1.0f - coeff) + z2 * coeff, 0, 0, 0);
 			}
-			level.playLocalSound(x, msg.pos.getY() + 0.5, z, EmbersSounds.CRYSTAL_CELL_GROW.get(), SoundSource.BLOCKS, 1.0f, 1.0f + random.nextFloat(), false);
+			var soundPosition = SubLevelCompat.toPhysicalPosition(crystalCell, new net.minecraft.world.phys.Vec3(x, msg.pos.getY() + 0.5, z));
+			crystalCell.getLevel().playLocalSound(soundPosition.x, soundPosition.y, soundPosition.z, EmbersSounds.CRYSTAL_CELL_GROW.get(), SoundSource.BLOCKS, 1.0f, 1.0f + random.nextFloat(), false);
 		}
 	}
 }

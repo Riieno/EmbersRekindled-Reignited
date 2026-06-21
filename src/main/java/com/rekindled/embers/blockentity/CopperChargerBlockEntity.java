@@ -23,6 +23,7 @@ import com.rekindled.embers.block.ItemDialBlock;
 import com.rekindled.embers.datagen.EmbersSounds;
 import com.rekindled.embers.particle.GlowParticleOptions;
 import com.rekindled.embers.power.DefaultEmberCapability;
+import com.rekindled.embers.util.SubLevelParticleUtil;
 import com.rekindled.embers.util.sound.ISoundController;
 
 import net.minecraft.core.BlockPos;
@@ -133,7 +134,7 @@ public class CopperChargerBlockEntity extends BlockEntity implements ISoundContr
 
 		if (blockEntity.isWorking && blockEntity.capability.getEmber() > 0) {
 			for (int i = 0; i < Math.ceil(blockEntity.capability.getEmber() / 500.0); i++) {
-				level.addParticle(GlowParticleOptions.EMBER, pos.getX()+0.25f+random.nextFloat()*0.5f, pos.getY()+0.25f+random.nextFloat()*0.5f, pos.getZ()+0.25f+random.nextFloat()*0.5f,
+				SubLevelParticleUtil.add(blockEntity, GlowParticleOptions.EMBER, pos.getX()+0.25f+random.nextFloat()*0.5f, pos.getY()+0.25f+random.nextFloat()*0.5f, pos.getZ()+0.25f+random.nextFloat()*0.5f,
 						(Math.random() * 2.0D - 1.0D) * 0.2D, (Math.random() * 2.0D - 1.0D) * 0.2D, (Math.random() * 2.0D - 1.0D) * 0.2D);
 			}
 		}

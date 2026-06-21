@@ -134,7 +134,7 @@ public class BeamSplitterBlockEntity extends BlockEntity implements IEmberPacket
 		if (trajectoryChunks2 == null)
 			trajectoryChunks2 = new HashSet<ChunkPos>();
 
-		Axis axis = level.getBlockState(worldPosition).getValue(BlockStateProperties.AXIS);
+		Axis axis = getBlockState().getValue(BlockStateProperties.AXIS);
 		Misc.calculateTrajectoryChunks(trajectoryChunks1, worldPosition, target1, EmberEmitterBlockEntity.getBurstVelocity(Direction.get(AxisDirection.POSITIVE, axis)));
 		Misc.calculateTrajectoryChunks(trajectoryChunks2, worldPosition, target2, EmberEmitterBlockEntity.getBurstVelocity(Direction.get(AxisDirection.NEGATIVE, axis)));
 	}
@@ -143,7 +143,7 @@ public class BeamSplitterBlockEntity extends BlockEntity implements IEmberPacket
 	public boolean hasRoomFor(double ember) {
 		refreshTrackedTargets();
 		if (trajectoryChunks1 == null || trajectoryChunks2 == null) {
-			Axis axis = level.getBlockState(worldPosition).getValue(BlockStateProperties.AXIS);
+			Axis axis = getBlockState().getValue(BlockStateProperties.AXIS);
 			trajectoryChunks1 = new HashSet<ChunkPos>();
 			trajectoryChunks2 = new HashSet<ChunkPos>();
 			Misc.calculateTrajectoryChunks(trajectoryChunks1, worldPosition, target1, EmberEmitterBlockEntity.getBurstVelocity(Direction.get(AxisDirection.POSITIVE, axis)));
@@ -199,7 +199,7 @@ public class BeamSplitterBlockEntity extends BlockEntity implements IEmberPacket
 	public void split(double ember) {
 		refreshTrackedTargets();
 		if ((target1 != null || target2 != null) && ember > 0.1) {
-			Axis axis = level.getBlockState(worldPosition).getValue(BlockStateProperties.AXIS);
+			Axis axis = getBlockState().getValue(BlockStateProperties.AXIS);
 			if (trajectoryChunks1 == null || trajectoryChunks2 == null) {
 				trajectoryChunks1 = new HashSet<ChunkPos>();
 				trajectoryChunks2 = new HashSet<ChunkPos>();
@@ -239,7 +239,7 @@ public class BeamSplitterBlockEntity extends BlockEntity implements IEmberPacket
 
 	@Override
 	public void setTargetPosition(BlockPos pos, Direction side) {
-		if (!pos.equals(worldPosition) && side.getAxis() == level.getBlockState(worldPosition).getValue(BlockStateProperties.AXIS)) {
+		if (!pos.equals(worldPosition) && side.getAxis() == getBlockState().getValue(BlockStateProperties.AXIS)) {
 			if (side.getAxisDirection() == AxisDirection.POSITIVE) {
 				target1 = pos;
 				target1SubLevelId = null;
@@ -257,7 +257,7 @@ public class BeamSplitterBlockEntity extends BlockEntity implements IEmberPacket
 
 	@Override
 	public void setTargetPosition(BlockPos pos, Direction side, BlockEntity targetEntity) {
-		if (!pos.equals(worldPosition) && side.getAxis() == level.getBlockState(worldPosition).getValue(BlockStateProperties.AXIS)) {
+		if (!pos.equals(worldPosition) && side.getAxis() == getBlockState().getValue(BlockStateProperties.AXIS)) {
 			SubLevelCompat.TrackedPosition trackedPosition = SubLevelCompat.captureTrackedTarget(targetEntity,
 					side.getAxisDirection() == AxisDirection.POSITIVE ? target1TrackingPointId : target2TrackingPointId);
 			if (side.getAxisDirection() == AxisDirection.POSITIVE) {
@@ -277,7 +277,7 @@ public class BeamSplitterBlockEntity extends BlockEntity implements IEmberPacket
 
 	@Override
 	public Vec3 getEmittingDirection(Direction side) {
-		if (side.getAxis() == level.getBlockState(worldPosition).getValue(BlockStateProperties.AXIS)) {
+		if (side.getAxis() == getBlockState().getValue(BlockStateProperties.AXIS)) {
 			return EmberEmitterBlockEntity.getBurstVelocity(side);
 		}
 		return null;
@@ -285,7 +285,7 @@ public class BeamSplitterBlockEntity extends BlockEntity implements IEmberPacket
 
 	@Override
 	public BlockPos getTarget(Direction side) {
-		if (side.getAxis() == level.getBlockState(worldPosition).getValue(BlockStateProperties.AXIS)) {
+		if (side.getAxis() == getBlockState().getValue(BlockStateProperties.AXIS)) {
 			if (side.getAxisDirection() == AxisDirection.POSITIVE)
 				return target1;
 			return target2;
@@ -295,7 +295,7 @@ public class BeamSplitterBlockEntity extends BlockEntity implements IEmberPacket
 
 	@Override
 	public UUID getTargetSubLevelId(Direction side) {
-		if (side.getAxis() == level.getBlockState(worldPosition).getValue(BlockStateProperties.AXIS)) {
+		if (side.getAxis() == getBlockState().getValue(BlockStateProperties.AXIS)) {
 			if (side.getAxisDirection() == AxisDirection.POSITIVE)
 				return target1 == null ? null : target1SubLevelId;
 			return target2 == null ? null : target2SubLevelId;
