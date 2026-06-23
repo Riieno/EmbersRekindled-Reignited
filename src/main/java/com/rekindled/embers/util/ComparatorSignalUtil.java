@@ -15,8 +15,13 @@ import com.rekindled.embers.api.tile.IExtraDialInformation;
 import com.rekindled.embers.block.EmberDialBlock;
 import com.rekindled.embers.block.FluidDialBlock;
 import com.rekindled.embers.block.ItemDialBlock;
+import com.rekindled.embers.block.MechEdgeBlockBase;
+import com.rekindled.embers.block.MechEdgeBlockBase.MechEdge;
+import com.rekindled.embers.blockentity.CopperChargerBlockEntity;
+import com.rekindled.embers.blockentity.CrystalSeedBlockEntity;
 import com.rekindled.embers.blockentity.MechanicalCoreBlockEntity;
 import com.rekindled.embers.blockentity.MechanicalCoreBlockEntity.BlockEntityDirection;
+import com.rekindled.embers.blockentity.MixerCentrifugeBottomBlockEntity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -52,8 +57,12 @@ public final class ComparatorSignalUtil {
 		}
 		BlockPos sourcePos = source.getBlockPos();
 		BlockState sourceState = source.getBlockState();
+		boolean sourceSignalChanged = false;
 		if (sourceState.hasAnalogOutputSignal()) {
-			notifyIfChanged(level, source);
+			sourceSignalChanged = notifyIfChanged(level, source);
+		}
+		if (sourceSignalChanged) {
+			notifyMultiblockEdges(level, sourcePos);
 		}
 
 		ArrayDeque<BlockPos> pending = new ArrayDeque<>();
@@ -77,17 +86,51 @@ public final class ComparatorSignalUtil {
 		}
 	}
 
-	private static void notifyIfChanged(ServerLevel level, BlockEntity blockEntity) {
+	private static boolean notifyIfChanged(ServerLevel level, BlockEntity blockEntity) {
 		int signal = getSignal(level, blockEntity.getBlockPos());
 		Integer previous = LAST_SIGNALS.put(blockEntity, signal);
 		if (previous == null || previous.intValue() != signal) {
 			level.updateNeighbourForOutputSignal(blockEntity.getBlockPos(), blockEntity.getBlockState().getBlock());
+			return true;
+		}
+		return false;
+	}
+
+	private static void notifyMultiblockEdges(ServerLevel level, BlockPos centerPos) {
+		for (MechEdge edge : MechEdge.values()) {
+			BlockPos edgePos = centerPos.subtract(edge.centerPos);
+			BlockState edgeState = level.getBlockState(edgePos);
+			if (edgeState.getBlock() instanceof MechEdgeBlockBase
+					&& edgeState.hasProperty(MechEdgeBlockBase.EDGE)
+					&& edgeState.getValue(MechEdgeBlockBase.EDGE) == edge) {
+				level.updateNeighbourForOutputSignal(edgePos, edgeState.getBlock());
+			}
 		}
 	}
 
 	private static int getSignal(@Nullable BlockEntity blockEntity, @Nullable Direction side) {
 		if (blockEntity == null || blockEntity.isRemoved()) {
 			return 0;
+		}
+		if (blockEntity instanceof CrystalSeedBlockEntity seed) {
+			int level = CrystalSeedBlockEntity.getLevel(seed.xp);
+			int currentLevelExperience = seed.getRequiredExperienceForLevel(level);
+			int nextLevelExperience = seed.getRequiredExperienceForLevel(level + 1);
+			return scale(seed.xp - currentLevelExperience, nextLevelExperience - currentLevelExperience);
+		}
+		if (blockEntity instanceof CopperChargerBlockEntity charger) {
+			ItemStack stack = charger.inventory.getStackInSlot(0);
+			IEmberCapability itemEmber = CapabilityCompat.getCapability(stack, EmbersCapabilities.EMBER_CAPABILITY, null).orElse(null);
+			return itemEmber == null ? 0 : scale(itemEmber.getEmber(), itemEmber.getEmberCapacity());
+		}
+		if (side == null && blockEntity instanceof MixerCentrifugeBottomBlockEntity mixer) {
+			long amount = 0;
+			long capacity = 0;
+			for (IFluidHandler tank : mixer.getTanks()) {
+				amount += tank.getFluidInTank(0).getAmount();
+				capacity += Math.max(0, tank.getTankCapacity(0));
+			}
+			return scale(amount, capacity);
 		}
 
 		IFluidHandler fluids = findFluidHandler(blockEntity, side);

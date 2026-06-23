@@ -478,6 +478,7 @@ public class EmbersLang extends LanguageProvider {
 		add(Embers.MODID + ".jei.recipe.catalysis_combustion.burn_time", "Burn Time: %s");
 		add(Embers.MODID + ".jei.recipe.catalysis_combustion.multiplier", "Multiplier: %s");
 		add(Embers.MODID + ".jei.recipe.dawnstone_anvil", "Dawnstone Anvil");
+		add(Embers.MODID + ".jei.recipe.world_interaction", "World Interaction");
 		add("dimension." + Level.OVERWORLD.location().toLanguageKey(), "Overworld");
 		add("dimension." + Level.NETHER.location().toLanguageKey(), "The Nether");
 		add("dimension." + Level.END.location().toLanguageKey(), "The End");

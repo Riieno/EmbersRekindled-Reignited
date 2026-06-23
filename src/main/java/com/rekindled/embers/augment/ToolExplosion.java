@@ -34,7 +34,7 @@ public class ToolExplosion extends Explosion {
 		if (!level.isClientSide) {
 			for (BlockPos pos : List.copyOf(getToBlow())) {
 				BlockState state = level.getBlockState(pos);
-				if (state.isAir())
+				if (state.isAir() || state.getDestroySpeed(level, pos) < 0)
 					continue;
 				BlockEntity blockEntity = state.hasBlockEntity() ? level.getBlockEntity(pos) : null;
 				Block.dropResources(state, level, pos, blockEntity, getDirectSourceEntity(), tool);

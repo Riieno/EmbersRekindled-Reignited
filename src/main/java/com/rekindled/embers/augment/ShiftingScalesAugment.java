@@ -34,7 +34,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import com.rekindled.embers.compat.legacy.capabilities.Capability;
 import com.rekindled.embers.compat.legacy.capabilities.ICapabilitySerializable;
 import com.rekindled.embers.compat.legacy.LazyOptional;
-import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.bus.api.EventPriority;
@@ -130,19 +130,21 @@ public class ShiftingScalesAugment extends AugmentBase {
 	}
 
 	@SubscribeEvent(priority = EventPriority.LOW)
-	public void onHit(LivingIncomingDamageEvent event) {
+	public void onHit(LivingDamageEvent.Pre event) {
 		if (!(event.getEntity() instanceof LivingEntity entity)) return;
 		DamageSource source = event.getSource();
 		if (unaffectedDamageTypes.contains(source.type().msgId()))
+			return;
+		if (event.getNewDamage() <= 0.0f)
 			return;
 
 		int scaleLevel = AugmentUtil.getArmorAugmentLevel(entity, this) * 2;
 		if (scaleLevel > 0) {
 			if (!entity.level().isClientSide())
 				setMaxCooldown(entity.getUUID(), COOLDOWN * 3);
-			ScaleEvent scaleEvent = new ScaleEvent(entity, event.getAmount(), source, ConfigManager.getScaleDamageRate(source.type().msgId()), ConfigManager.getScaleDamagePass(source.type().msgId()));
+			ScaleEvent scaleEvent = new ScaleEvent(entity, event.getNewDamage(), source, ConfigManager.getScaleDamageRate(source.type().msgId()), ConfigManager.getScaleDamagePass(source.type().msgId()));
 			NeoForge.EVENT_BUS.post(scaleEvent);
-			double totalDamage = event.getAmount();
+			double totalDamage = event.getNewDamage();
 			double extraDamage = totalDamage * scaleEvent.getScalePassRate();
 			totalDamage -= extraDamage;
 			double multiplier = scaleEvent.getScaleDamageRate();
@@ -156,7 +158,7 @@ public class ShiftingScalesAugment extends AugmentBase {
 				entity.level().playSound(null, entity, EmbersSounds.SHIFTING_SCALES_BREAK.get(), entity instanceof Player ? SoundSource.PLAYERS : SoundSource.HOSTILE, 10.0f, 1.0f);
 			}
 			EmbersAPI.setScales(entity, scales);
-			event.setAmount((float) ((damage == 0 ? 0 : damage / multiplier) + extraDamage));
+			event.setNewDamage((float) ((damage == 0 ? 0 : damage / multiplier) + extraDamage));
 		}
 	}
 

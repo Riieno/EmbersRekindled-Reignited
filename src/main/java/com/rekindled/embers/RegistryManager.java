@@ -1185,6 +1185,7 @@ public class RegistryManager {
 			moltenMetalFluidInteractions(MOLTEN_SILVER.TYPE.get());
 			moltenMetalFluidInteractions(MOLTEN_DAWNSTONE.TYPE.get());
 			moltenMetalFluidInteractions(MOLTEN_MITHRIL.TYPE.get());
+			moltenMetalFluidInteractions(MOLTEN_NICKEL.TYPE.get());
 			moltenMetalFluidInteractions(MOLTEN_TIN.TYPE.get());
 			moltenMetalFluidInteractions(MOLTEN_ALUMINUM.TYPE.get());
 			moltenMetalFluidInteractions(MOLTEN_ZINC.TYPE.get());

@@ -72,11 +72,14 @@ public class CrystalSeedBlockEntity extends BlockEntity implements IEmberInjecta
 	}
 
 	public static boolean[] getSpawns(int xp) {
-		int segments = Math.max(6 + bonusParts, 1);
-		segments += getLevelBonus(getLevel(xp));
-		boolean[] willSpawn = new boolean[segments];
-		for (int i = 0; i < willSpawn.length; i ++){
+		int baseSegments = Math.max(6 + bonusParts, 1);
+		int levelBonus = getLevelBonus(getLevel(xp));
+		boolean[] willSpawn = new boolean[baseSegments + levelBonus];
+		for (int i = 0; i < baseSegments; i ++){
 			willSpawn[i] = random.nextInt(3) == 0;
+		}
+		for (int i = baseSegments; i < willSpawn.length; i++) {
+			willSpawn[i] = true;
 		}
 		return willSpawn;
 	}
@@ -171,7 +174,11 @@ public class CrystalSeedBlockEntity extends BlockEntity implements IEmberInjecta
 	}
 
 	public void addExperience(int xp) {
+		int previousLevel = getLevel(this.xp);
 		this.xp += xp;
+		if (getLevel(this.xp) != previousLevel) {
+			willSpawn = getSpawns(this.xp);
+		}
 	}
 
 	public int getRequiredExperienceForLevel(int level) {

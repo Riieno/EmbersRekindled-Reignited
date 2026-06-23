@@ -1,7 +1,6 @@
 package com.rekindled.embers.block;
 
 import com.mojang.serialization.MapCodec;
-import com.rekindled.embers.datagen.EmbersBlockTags;
 import com.rekindled.embers.util.ComparatorSignalUtil;
 
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -59,9 +58,7 @@ public abstract class EmbersEntityBlock extends BaseEntityBlock {
 
 	@Override
 	public boolean hasAnalogOutputSignal(BlockState state) {
-		return !state.is(EmbersBlockTags.MECH_CORE_PROXYABLE)
-				&& !state.is(EmbersBlockTags.MECH_CORE_PROXYABLE_BOTTOM)
-				&& !state.is(EmbersBlockTags.MECH_CORE_PROXYABLE_TOP);
+		return true;
 	}
 
 	@Override

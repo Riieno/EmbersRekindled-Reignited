@@ -56,6 +56,7 @@ public class JEIPlugin implements IModPlugin {
 	public static final RecipeType<IGaseousFuelRecipe> GASEOUS_FUEL = RecipeType.create(Embers.MODID, "gaseous_fuel", IGaseousFuelRecipe.class);
 	public static final RecipeType<ICatalysisCombustionRecipe> CATALYSIS_COMBUSTION = RecipeType.create(Embers.MODID, "catalysis_combustion", ICatalysisCombustionRecipe.class);
 	public static final RecipeType<IDawnstoneAnvilRecipe> DAWNSTONE_ANVIL = RecipeType.create(Embers.MODID, "dawnstone_anvil", IDawnstoneAnvilRecipe.class);
+	public static final RecipeType<WorldInteractionRecipe> WORLD_INTERACTION = RecipeType.create(Embers.MODID, "world_interaction", WorldInteractionRecipe.class);
 
 	@Override
 	public ResourceLocation getPluginUid() {
@@ -94,6 +95,7 @@ public class JEIPlugin implements IModPlugin {
 		registry.addRecipeCategories(new GaseousFuelCategory(guiHelper));
 		registry.addRecipeCategories(new CatalysisCombustionCategory(guiHelper));
 		registry.addRecipeCategories(new DawnstoneAnvilCategory(guiHelper));
+		registry.addRecipeCategories(new WorldInteractionCategory(guiHelper));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -147,6 +149,8 @@ public class JEIPlugin implements IModPlugin {
 		addRecipes(register, manager, CATALYSIS_COMBUSTION, RegistryManager.CATALYSIS_COMBUSTION.get());
 
 		addRecipes(register, manager, DAWNSTONE_ANVIL, RegistryManager.DAWNSTONE_ANVIL_RECIPE.get());
+
+		register.addRecipes(WORLD_INTERACTION, List.of(WorldInteractionRecipe.solidifiedMetal()));
 	}
 
 

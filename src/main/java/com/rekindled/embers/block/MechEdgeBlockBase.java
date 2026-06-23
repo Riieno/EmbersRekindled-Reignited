@@ -4,6 +4,8 @@ import java.util.HashMap;
 
 import javax.annotation.Nullable;
 
+import com.rekindled.embers.util.ComparatorSignalUtil;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -68,6 +70,16 @@ public abstract class MechEdgeBlockBase extends Block implements SimpleWaterlogg
 	}
 
 	public abstract Block getCenterBlock();
+
+	@Override
+	public boolean hasAnalogOutputSignal(BlockState state) {
+		return true;
+	}
+
+	@Override
+	public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
+		return ComparatorSignalUtil.getSignal(level, pos.offset(state.getValue(EDGE).centerPos));
+	}
 
 	public ItemStack getCloneItemStack(BlockGetter pLevel, BlockPos pPos, BlockState pState) {
 		return new ItemStack(getCenterBlock());

@@ -348,6 +348,7 @@
   "embers.jei.recipe.metal_coefficient": "Production Multiplier",
   "embers.jei.recipe.mixing": "Mixing",
   "embers.jei.recipe.stamping": "Stamping",
+  "embers.jei.recipe.world_interaction": "World Interaction",
   "embers.jade.ember": "Ember: %s/%s",
   "embers.jade.ember.volatile": "Accepts Volatile Ember",
   "embers.jade.energy": "Energy: %s/%s FE",
