@@ -9,11 +9,15 @@ You can also talk about Embers Re-Ignited and contact me about the port on my di
 
 # So about that port
 
-## Things I have changed:
-- Full forward port to Minecraft 1.21.1 and NeoForge
-- New Ember consumer blocks `Ember Kinetic Motor` converts embers to create rotation (upgradable with catalytics) and `Ember Dynamo` converts Embers to FE
-- New compat goggles that combine the Ashen goggles and creates Engineer's goggles into one item
-- Sable sub-level support so you can transfer embers acoss sable/aeronautics contraptions
-- Create blaze burners can consumer Embers to `HEAT` and adding a bellows superheats `SEATHING` blaze burners
-- Ember funnels attached to a blaze burner will check a 3x3 and supply embers to up to 9 blaze burners in the 3x3
-- Hearth Coil can heat and super heat blaze burners placed on top of it
+## Changes I made
+
+*   Create support and Create SU generation from Embers
+*   Sable sub-level support
+*   Combined Ashen and Engineer's goggles
+*   Embers to FE dynamo
+*   Blaze burners can be powered by Embers and superheated with a `Bellows`
+*   Hearth coil can power a 3x3 grid of `Blaze Burner`s placed on top of it, and super heat with a `Bellows`, requires a lot of `Ember` to super heat the 3x3
+*   `Ember Funnel` placed on a `Blaze Burner` will check a 3x3 from the blaze burner and provide embers to all blaze burners within
+*   Modified Structure and Ore generation to happen after terrain generation so terrain generation mods don't break it
+*   Added `Caminite Turngear` and `Sightstone` to allow auto tracking `Sub-level Contraptions` and using a `Beam Cannon` to recharge their ember stores
+*   Added `Create` powered machine upgrades and `Engineer's Hammer` to combine the `Engineer's Wrench` and `Tinker's Hammer` into one item
