@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.IntStream;
 
+import com.rekindled.embers.ConfigManager;
 import com.rekindled.embers.Embers;
 import com.rekindled.embers.RegistryManager.MetalCrystalSeed;
 import com.rekindled.embers.api.tile.IEmberInjectable;
@@ -47,11 +48,23 @@ public class CrystalSeedBlockEntity extends BlockEntity implements IEmberInjecta
 	public static int bonusParts = 0;
 	public int ticksExisted = 0;
 	protected static Random random = new Random();
+	public static final double DEFAULT_LEVEL_BONUS_SCALAR = 2.0D;
+	public static final boolean DEFAULT_USE_EXPERIMENTAL_SCALING = true;
 
 	public static final int SOUND_AMBIENT = 1;
 	public static final int[] SOUND_IDS = new int[]{SOUND_AMBIENT};
 
 	HashSet<Integer> soundsPlaying = new HashSet<>();
+
+	
+
+	private static boolean useExperimentalScaling() {
+		return ConfigManager.CRYSTAL_SEED_USE_EXPERIMENTAL_SCALING == null ? DEFAULT_USE_EXPERIMENTAL_SCALING : ConfigManager.CRYSTAL_SEED_USE_EXPERIMENTAL_SCALING.get();
+	}
+
+	private static double getLevelBonusScalar() {
+		return ConfigManager.CRYSTAL_SEED_LEVEL_BONUS_SCALAR == null ? DEFAULT_LEVEL_BONUS_SCALAR : ConfigManager.CRYSTAL_SEED_LEVEL_BONUS_SCALAR.get();
+	}
 
 	public CrystalSeedBlockEntity(BlockPos pos, BlockState blockState, String type) {
 		this(MetalCrystalSeed.seeds.get(type).BLOCKENTITY.get(), pos, blockState, type);
@@ -72,8 +85,7 @@ public class CrystalSeedBlockEntity extends BlockEntity implements IEmberInjecta
 	}
 
 	public static boolean[] getSpawns(int xp) {
-		int segments = Math.max(6 + bonusParts, 1);
-		segments += getLevelBonus(getLevel(xp));
+		int segments = getSpawnSegments(xp);
 		boolean[] willSpawn = new boolean[segments];
 		for (int i = 0; i < willSpawn.length; i ++){
 			willSpawn[i] = random.nextInt(3) == 0;
@@ -82,6 +94,9 @@ public class CrystalSeedBlockEntity extends BlockEntity implements IEmberInjecta
 	}
 
 	public static int getLevelBonus(int level) {
+		if (useExperimentalScaling()) {
+			return (int) Math.sqrt(Math.max(0, level) * getLevelBonusScalar());
+		}
 		if (level > 50) {
 			return getLevelBonus(50) + (level-50)/25;
 		} else if (level > 20) {
@@ -93,6 +108,12 @@ public class CrystalSeedBlockEntity extends BlockEntity implements IEmberInjecta
 		} else {
 			return (level+1)/2;
 		}
+	}
+
+	private static int getSpawnSegments(int xp) {
+		int segments = Math.max(6 + bonusParts, 1);
+		segments += getLevelBonus(getLevel(xp));
+		return Math.max(segments, 1);
 	}
 
 	public static String getSpawnString(boolean[] willSpawn) {
@@ -147,6 +168,7 @@ public class CrystalSeedBlockEntity extends BlockEntity implements IEmberInjecta
 
 	public static void serverTick(Level level, BlockPos pos, BlockState state, CrystalSeedBlockEntity blockEntity) {
 		blockEntity.ticksExisted++;
+		blockEntity.refreshSpawnsIfSegmentCountChanged();
 		if (blockEntity.size > 1000) {
 			blockEntity.size = 0;
 			ItemStack[] stacks = blockEntity.getNuggetDrops(blockEntity.willSpawn.length);
@@ -163,6 +185,14 @@ public class CrystalSeedBlockEntity extends BlockEntity implements IEmberInjecta
 			blockEntity.willSpawn = getSpawns(blockEntity.xp);
 			blockEntity.setChanged();
 			blockEntity.syncToClient();
+		}
+	}
+
+	private void refreshSpawnsIfSegmentCountChanged() {
+		if (willSpawn == null || willSpawn.length != getSpawnSegments(xp)) {
+			willSpawn = getSpawns(xp);
+			setChanged();
+			syncToClient();
 		}
 	}
 

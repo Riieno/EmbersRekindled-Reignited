@@ -28,6 +28,8 @@ public class ConfigManager {
 	public static ConfigValue<Double> MINI_BOILER_HEAT_MULTIPLIER;
 	public static ConfigValue<Boolean> MINI_BOILER_CAN_EXPLODE;
 	public static ConfigValue<Integer> INJECTOR_MAX_DISTANCE;
+	public static ConfigValue<Boolean> CRYSTAL_SEED_USE_EXPERIMENTAL_SCALING;
+	public static ConfigValue<Double> CRYSTAL_SEED_LEVEL_BONUS_SCALAR;
 	public static ConfigValue<Integer> MELTER_PROCESS_TIME;
 	public static ConfigValue<Double> MELTER_EMBER_COST;
 	public static ConfigValue<Integer> MELTER_CAPACITY;
@@ -161,6 +163,8 @@ public class ConfigManager {
 		FLUID_VESSEL_CAPACITY = COMMON.comment("How much fluid (in mb) fits into the Fluid Vessel.").define("fluidVessel.capacity", FluidType.BUCKET_VOLUME * 16);
 
 		INJECTOR_MAX_DISTANCE = COMMON.comment("The maximum distance that Ember Injectors can be placed from a crystal seed.").define("ember_injector.max_distance", 1);
+		CRYSTAL_SEED_USE_EXPERIMENTAL_SCALING = COMMON.comment("If true, crystal seeds use square-root level scaling for extra nugget drop roll segments instead of the original stepped scaling.").define("crystal_seed.use_experimental_scaling", true);
+		CRYSTAL_SEED_LEVEL_BONUS_SCALAR = COMMON.comment("Multiplier used by experimental crystal seed scaling. Extra roll segments are floor(sqrt(level * scalar)).").defineInRange("crystal_seed.level_bonus_scalar", 2.0, 0.0, 1024.0);
 
 		HEARTH_COIL_EMBER_COST = COMMON.comment("The amount of ember consumed per tick.").define("hearth_coil.ember_cost", 1.0);
 		HEARTH_COIL_HEATING_SPEED = COMMON.comment("The amount of heat gained per tick when consuming ember.").define("hearth_coil.heating_speed", 1.0);

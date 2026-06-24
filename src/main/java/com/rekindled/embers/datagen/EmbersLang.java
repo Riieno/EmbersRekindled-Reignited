@@ -1157,6 +1157,8 @@ public class EmbersLang extends LanguageProvider {
 		addConfigLabel("hearth_coil.max_heat", "Hearth Coil Max Heat");
 		addConfigLabel("hearth_coil.min_cook_time", "Hearth Coil Min Cook Time");
 		addConfigLabel("hearth_coil.max_cook_time", "Hearth Coil Max Cook Time");
+		addConfigLabel("crystal_seed.use_experimental_scaling", "Crystal Seed Experimental Scaling");
+		addConfigLabel("crystal_seed.level_bonus_scalar", "Crystal Seed Level Bonus Scalar");
 		addConfigLabel("create.blaze_burner.ember_cost", "Create Blaze Burner Ember Cost");
 		addConfigLabel("create.blaze_burner.superheat_cost", "Create Blaze Burner Superheat Cost");
 		addConfigLabel("dawnstone_anvil.max_hits", "Dawnstone Anvil Max Hits");
