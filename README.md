@@ -5,7 +5,7 @@ Embers is best described as a dwarven magic mod. It features a smattering of mag
 [CurseForge](https://www.curseforge.com/minecraft/mc-mods/embers-re-ignited)
 [Modrinth](https://modrinth.com/mod/embers-re-ignited)
 ## Contact
-You can also talk about Embers Re-Ignited and contact me about the port on my discord @ Rieno
+You can also talk about Embers Re-Ignited and contact me about the port on my [discord @ Rieno](https://discord.gg/7pUhKF4uKD) Or you may find me in [RCXCrafters Discord](https://discord.gg/SthsknG) for general Embers([Rekindled](https://github.com/RCXcrafter/EmbersRekindled)/Re-Ignited) questions
 
 # So about that port
 
