@@ -26,6 +26,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class ClockworkToolItem extends DiggerItem implements IEmberChargedTool {
+	private static final double EMBER_USE_COST = 5.0;
 
 	public ClockworkToolItem(float attackDamageModifier, float attackSpeedModifier, Tier tier, TagKey<Block> blocks, Properties properties) {
 		super(tier, blocks, properties.attributes(DiggerItem.createAttributes(tier, attackDamageModifier, attackSpeedModifier)));
@@ -33,7 +34,7 @@ public class ClockworkToolItem extends DiggerItem implements IEmberChargedTool {
 
 	@Override
 	public boolean onLeftClickEntity(ItemStack stack, Player player, Entity entity) {
-		if (hasEmber(stack)) {
+		if (canUseEmber(stack, player)) {
 			entity.setRemainingFireTicks(40);
 			return false;
 		}
@@ -103,7 +104,7 @@ public class ClockworkToolItem extends DiggerItem implements IEmberChargedTool {
 		} else {
 			if (entity instanceof Player player) {
 				if (world.getGameTime() % 5 == 0) {
-					if (EmberInventoryUtil.getEmberTotal(player) > 5.0) {
+					if (player.isCreative() || EmberInventoryUtil.getEmberTotal(player) >= EMBER_USE_COST) {
 						if (!ItemData.getTag(stack).getBoolean("poweredOn")) {
 							ItemData.updateTag(stack, tag -> tag.putBoolean("poweredOn", true));
 						}
@@ -114,8 +115,10 @@ public class ClockworkToolItem extends DiggerItem implements IEmberChargedTool {
 					}
 				}
 				if (ItemData.getTag(stack).getBoolean("didUse")) {
-					EmberInventoryUtil.removeEmber(player, 5.0);
-					boolean poweredOn = EmberInventoryUtil.getEmberTotal(player) >= 5.0;
+					if (!player.isCreative()) {
+						EmberInventoryUtil.removeEmber(player, EMBER_USE_COST);
+					}
+					boolean poweredOn = player.isCreative() || EmberInventoryUtil.getEmberTotal(player) >= EMBER_USE_COST;
 					ItemData.updateTag(stack, tag -> {
 						tag.putBoolean("didUse", false);
 						if (!poweredOn)
@@ -129,5 +132,9 @@ public class ClockworkToolItem extends DiggerItem implements IEmberChargedTool {
 	@Override
 	public boolean hasEmber(ItemStack stack) {
 		return ItemData.hasTag(stack) && ItemData.getTag(stack).getBoolean("poweredOn");
+	}
+
+	private boolean canUseEmber(ItemStack stack, Player player) {
+		return hasEmber(stack) || player.isCreative() || EmberInventoryUtil.getEmberTotal(player) >= EMBER_USE_COST;
 	}
 }
