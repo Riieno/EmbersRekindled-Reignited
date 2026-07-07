@@ -1,5 +1,6 @@
 package com.rekindled.embers.compat.create;
 
+import com.rekindled.embers.ConfigManager;
 import com.rekindled.embers.api.capabilities.EmbersCapabilities;
 import com.rekindled.embers.api.tile.IMechanicalPowerProvider;
 import com.rekindled.embers.compat.legacy.LazyOptional;
@@ -22,7 +23,7 @@ public class CreatePoweredActuatorBlockEntity extends KineticBlockEntity impleme
 
     @Override
     public double getMechanicalPower() {
-        return this.getSpeed() * 1; // The multiplier is a placeholder and should be configurable
+        return this.getSpeed() * ConfigManager.KINETIC_ACTUATOR_RATIO.get();
     }
 
 	public Direction getShaftSide() {

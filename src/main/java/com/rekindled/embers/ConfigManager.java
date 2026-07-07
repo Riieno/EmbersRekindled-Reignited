@@ -68,6 +68,8 @@ public class ConfigManager {
 	public static ConfigValue<Integer> ASHEN_BOOTS_SLOTS;
 	public static ConfigValue<List<? extends String>> SCALE_DAMAGE_PASSES;
 	public static ConfigValue<List<? extends String>> SCALE_DAMAGE_RATES;
+	public static ConfigValue<Double> KINETIC_ACTUATOR_RATIO;
+	public static ConfigValue<Double> KINETIC_ACTUATOR_STRESS_IMPACT;
 
 	public static ConfigValue<Boolean> CODEX_PROGRESSION;
 	public static ConfigValue<Boolean> PVP_EVERYBODY_IS_ENEMY;
@@ -218,6 +220,9 @@ public class ConfigManager {
 
 		SCALE_DAMAGE_PASSES = COMMON.comment("Syntax is 'damagetype:rate'. Determines which damage types are partially unaffected by the shifting scales augment.").defineList("shiftingScales.damagePasses", defaultScaleDamagePasses, () -> "", a -> true);
 		SCALE_DAMAGE_RATES = COMMON.comment("Syntax is 'damagetype:rate'. Specifies a separate damage rate for depleting the scales.").defineList("shiftingScales.damageRates", defaultScaleDamageRates, () -> "", a -> true);
+
+		KINETIC_ACTUATOR_RATIO = COMMON.comment("The conversion ratio from Create speed to mechanical power (set to 0 to effectively disable the Kinetic Actuator).").define("kineticActuator.powerRatio", 1.0);
+		KINETIC_ACTUATOR_STRESS_IMPACT = COMMON.comment("The base SU impact of the Kinetic Actuator.").define("kineticActuator.stressImpact", 8.0);
 
 		COMMON.pop();
 

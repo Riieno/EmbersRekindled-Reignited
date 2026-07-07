@@ -1,5 +1,6 @@
 package com.rekindled.embers.compat.create;
 
+import com.rekindled.embers.ConfigManager;
 import com.simibubi.create.content.kinetics.base.DirectionalKineticBlock;
 import com.simibubi.create.foundation.block.IBE;
 
@@ -41,7 +42,7 @@ public class CreatePoweredActuatorBlock extends DirectionalKineticBlock implemen
     }
 
     public double stressImpactPerRpm() {
-		return 8; // This should be configurable
+		return ConfigManager.KINETIC_ACTUATOR_STRESS_IMPACT.get();
 	}
     
 }
