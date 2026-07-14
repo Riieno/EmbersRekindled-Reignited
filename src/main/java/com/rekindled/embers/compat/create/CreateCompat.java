@@ -77,6 +77,14 @@ public final class CreateCompat {
 			() -> new MixedGogglesItem(new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(AshenArmorItem.DURABILITY_MULTIPLIER)), ConfigManager.ASHEN_GOGGLES_SLOTS));
 	public static final Map<CreatePoweredUpgradeType, DeferredBlock<CreatePoweredEmberUpgradeBlock>> CREATE_POWERED_UPGRADES = registerCreatePoweredUpgradeBlocks();
 	public static final Map<CreatePoweredUpgradeType, DeferredItem<CreatePoweredUpgradeItem>> CREATE_POWERED_UPGRADE_ITEMS = registerCreatePoweredUpgradeItems();
+	public static final DeferredBlock<CreatePoweredActuatorBlock> CREATE_POWERED_ACTUATOR = BLOCKS.register(
+			"create_powered_actuator", 
+			() -> new CreatePoweredActuatorBlock(BlockBehaviour.Properties.of()
+					.mapColor(MapColor.TERRACOTTA_YELLOW)
+					.strength(1.6F)
+					.requiresCorrectToolForDrops()
+					.noOcclusion()));
+	public static final DeferredItem<BlockItem> CREATE_POWERED_ACTUATOR_ITEM = ITEMS.registerSimpleBlockItem(CREATE_POWERED_ACTUATOR);
 	public static final DeferredItem<TinkerWrenchItem> TINKER_WRENCH = ITEMS.register("tinker_wrench",
 			() -> new TinkerWrenchItem(new Item.Properties()));
 	public static final DeferredHolder<CreativeModeTab, CreativeModeTab> EMBERS_CREATE_TAB = CREATIVE_TABS.register("create",
@@ -91,6 +99,9 @@ public final class CreateCompat {
 	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CreatePoweredEmberUpgradeBlockEntity>> CREATE_POWERED_UPGRADE_ENTITY =
 			BLOCK_ENTITIES.register("create_powered_ember_upgrade",
 					() -> BlockEntityType.Builder.of(CreatePoweredEmberUpgradeBlockEntity::new, getCreatePoweredUpgradeBlocks()).build(null));
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CreatePoweredActuatorBlockEntity>> CREATE_POWERED_ACTUATOR_ENTITY =
+			BLOCK_ENTITIES.register("create_powered_actuator",
+					() -> BlockEntityType.Builder.of(CreatePoweredActuatorBlockEntity::new, CREATE_POWERED_ACTUATOR.get()).build(null));
 
 	private CreateCompat() {
 	}
@@ -137,6 +148,7 @@ public final class CreateCompat {
 			for (Map.Entry<CreatePoweredUpgradeType, DeferredBlock<CreatePoweredEmberUpgradeBlock>> entry : CREATE_POWERED_UPGRADES.entrySet()) {
 				BlockStressValues.IMPACTS.register(entry.getValue().get(), entry.getKey()::stressImpactPerRpm);
 			}
+			BlockStressValues.IMPACTS.register(CREATE_POWERED_ACTUATOR.get(), CREATE_POWERED_ACTUATOR.get()::stressImpactPerRpm);
 		});
 	}
 
@@ -212,6 +224,7 @@ public final class CreateCompat {
 
 	private static void buildCreateTabContents(CreativeModeTab.ItemDisplayParameters parameters, CreativeModeTab.Output output) {
 		output.accept(EMBER_KINETIC_GENERATOR_ITEM.get());
+		output.accept(CREATE_POWERED_ACTUATOR_ITEM.get());
 		output.accept(ENGINEERS_ASHEN_GOGGLES.get());
 		output.accept(TINKER_WRENCH.get());
 		if (experimentalMechanicsEnabled()) {

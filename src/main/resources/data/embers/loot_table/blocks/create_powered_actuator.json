@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "embers:create_powered_actuator"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "embers:blocks/create_powered_actuator"
+}

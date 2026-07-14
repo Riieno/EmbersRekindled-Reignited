@@ -151,6 +151,10 @@
 	{
       "id": "embers:explosion_pedestal",
       "required": false
-    }
+    },
+    {
+	    "id": "embers:create_powered_actuator",
+	    "required": false
+	  }
   ]
 }

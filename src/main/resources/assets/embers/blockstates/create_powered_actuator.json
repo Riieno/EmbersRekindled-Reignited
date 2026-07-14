@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "embers:block/create_powered_actuator",
+      "x": 180
+    },
+    "facing=east": {
+      "model": "embers:block/create_powered_actuator",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north": {
+      "model": "embers:block/create_powered_actuator",
+      "x": 90
+    },
+    "facing=south": {
+      "model": "embers:block/create_powered_actuator",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up": {
+      "model": "embers:block/create_powered_actuator"
+    },
+    "facing=west": {
+      "model": "embers:block/create_powered_actuator",
+      "x": 90,
+      "y": 270
+    }
+  }
+}
