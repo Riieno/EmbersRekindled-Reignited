@@ -94,6 +94,6 @@ public class ActuatorUpgrade extends DefaultUpgradeProvider {
     }
 
     private double getPower() {
-        return this.tile instanceof IMechanicalPowerProvider powerProvider ? powerProvider.getMechanicalPower() : 0;
+        return this.tile instanceof IMechanicalPowerProvider powerProvider ? Math.abs(powerProvider.getMechanicalPower()) : 0;
     }
 }
