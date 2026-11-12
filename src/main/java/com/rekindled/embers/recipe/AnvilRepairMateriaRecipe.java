@@ -6,6 +6,7 @@ import java.util.List;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonObject;
+import com.rekindled.embers.Embers;
 import com.rekindled.embers.RegistryManager;
 import com.rekindled.embers.datagen.EmbersItemTags;
 
@@ -50,14 +51,24 @@ public class AnvilRepairMateriaRecipe implements IDawnstoneAnvilRecipe, IVisuall
 	@Override
 	public List<IDawnstoneAnvilRecipe> getVisualRecipes() {
 		visualRecipes.clear();
+		// the repair input is the same for every item, so a single display with a cycling tool slot will do
+		List<ItemStack> tools = new ArrayList<>();
+		List<ItemStack> brokenTools = new ArrayList<>();
 		for (Holder<Item> holder : BuiltInRegistries.ITEM.asHolderIdMap()) {
-			ItemStack toolStack = new ItemStack(holder.value());
-			if (toolStack.isDamageableItem() && !blacklist.test(toolStack)) {
+			try {
+				ItemStack toolStack = new ItemStack(holder.value());
+				if (!toolStack.isDamageableItem() || blacklist.test(toolStack))
+					continue;
 				ItemStack brokenTool = toolStack.copy();
 				brokenTool.setDamageValue(brokenTool.getMaxDamage() / 2);
-				visualRecipes.add(new AnvilDisplayRecipe(id, List.of(toolStack), List.of(brokenTool), materia));
+				tools.add(toolStack);
+				brokenTools.add(brokenTool);
+			} catch (Exception e) {
+				Embers.LOGGER.error("Skipping dawnstone anvil materia display for " + holder.value(), e);
 			}
 		}
+		if (!tools.isEmpty())
+			visualRecipes.add(new AnvilDisplayRecipe(id, tools, brokenTools, materia));
 		return visualRecipes;
 	}
 

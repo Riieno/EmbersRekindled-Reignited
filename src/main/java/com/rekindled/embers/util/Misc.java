@@ -497,9 +497,13 @@ public class Misc {
 			}
 		}
 		if (item instanceof net.minecraft.world.item.ArmorItem armor) {
-			Ingredient ingredient = armor.getMaterial().value().repairIngredient().get();
-			if (ingredient != null)
-				return ingredient;
+			try {
+				Ingredient ingredient = armor.getMaterial().value().repairIngredient().get();
+				if (ingredient != null)
+					return ingredient;
+			} catch (Exception e) {
+				Embers.LOGGER.error("Item: \"" + BuiltInRegistries.ITEM.getKey(item) + "\" has no usable repair ingredient, this is a bug and should be reported to " + BuiltInRegistries.ITEM.getKey(item).getNamespace(), e);
+			}
 		}
 		return Ingredient.EMPTY;
 	}

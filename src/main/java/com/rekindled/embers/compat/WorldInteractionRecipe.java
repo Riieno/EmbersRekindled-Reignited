@@ -1,4 +1,4 @@
-package com.rekindled.embers.compat.jei;
+package com.rekindled.embers.compat;
 
 import java.util.List;
 
@@ -10,6 +10,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
 
+/** Shared by the JEI and EMI plugins, not part of either viewer's API. */
 public record WorldInteractionRecipe(List<FluidStack> primaryFluids, FluidStack secondaryFluid, ItemStack output) {
 
 	public static WorldInteractionRecipe solidifiedMetal() {

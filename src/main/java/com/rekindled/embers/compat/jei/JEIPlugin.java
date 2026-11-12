@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.rekindled.embers.Embers;
+import com.rekindled.embers.compat.WorldInteractionRecipe;
 import com.rekindled.embers.RegistryManager;
 import com.rekindled.embers.recipe.IAlchemyRecipe;
 import com.rekindled.embers.recipe.IBoilingRecipe;
@@ -101,16 +102,26 @@ public class JEIPlugin implements IModPlugin {
 
 	@SuppressWarnings("unchecked")
 	public static <I extends RecipeInput, T extends Recipe<I>> void addRecipes(IRecipeRegistration register, RecipeManager manager, RecipeType<T> jeiType, net.minecraft.world.item.crafting.RecipeType<T> type) {
-		List<T> recipes = manager.getAllRecipesFor(type).stream().map(RecipeHolder::value).toList();
-		List<T> visualRecipes = new ArrayList<T>();
-		for (T recipe : recipes) {
-			if (recipe instanceof IVisuallySplitRecipe) {
-				visualRecipes.addAll(((IVisuallySplitRecipe<T>) recipe).getVisualRecipes());
-			} else {
-				visualRecipes.add(recipe);
+		try {
+			List<T> recipes = manager.getAllRecipesFor(type).stream().map(RecipeHolder::value).toList();
+			List<T> visualRecipes = new ArrayList<T>();
+			for (T recipe : recipes) {
+				if (recipe instanceof IVisuallySplitRecipe) {
+					try {
+						visualRecipes.addAll(((IVisuallySplitRecipe<T>) recipe).getVisualRecipes());
+					} catch (Throwable t) {
+						// one bad recipe must not cost the whole category, and JEI drops every plugin contribution on a throw
+						Embers.LOGGER.error("Could not split the visual recipes for " + jeiType.getUid() + ", showing them whole", t);
+						visualRecipes.add(recipe);
+					}
+				} else {
+					visualRecipes.add(recipe);
+				}
 			}
+			register.addRecipes(jeiType, visualRecipes);
+		} catch (Throwable t) {
+			Embers.LOGGER.error("Could not register " + jeiType.getUid() + " recipes with JEI", t);
 		}
-		register.addRecipes(jeiType, visualRecipes);
 	}
 
 	@SuppressWarnings("resource")
@@ -160,8 +171,14 @@ public class JEIPlugin implements IModPlugin {
 		for (RecipeHolder<IDawnstoneAnvilRecipe> holder : manager.getAllRecipesFor(RegistryManager.DAWNSTONE_ANVIL_RECIPE.get())) {
 			IDawnstoneAnvilRecipe recipe = holder.value();
 			if (recipe instanceof IVisuallySplitRecipe<?> splitRecipe) {
-				List<IDawnstoneAnvilRecipe> visualRecipes =
-						(List<IDawnstoneAnvilRecipe>) (List<?>) splitRecipe.getVisualRecipes();
+				List<IDawnstoneAnvilRecipe> visualRecipes;
+				try {
+					visualRecipes = (List<IDawnstoneAnvilRecipe>) (List<?>) splitRecipe.getVisualRecipes();
+				} catch (Throwable t) {
+					Embers.LOGGER.error("Could not split the visual recipes of " + holder.id() + ", showing it whole", t);
+					recipes.add(holder);
+					continue;
+				}
 				for (int index = 0; index < visualRecipes.size(); index++) {
 					ResourceLocation displayId = ResourceLocation.fromNamespaceAndPath(holder.id().getNamespace(),
 							holder.id().getPath() + "/display_" + index);

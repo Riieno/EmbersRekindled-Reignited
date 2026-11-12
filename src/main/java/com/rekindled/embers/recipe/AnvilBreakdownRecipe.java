@@ -1,11 +1,14 @@
 package com.rekindled.embers.recipe;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonObject;
+import com.rekindled.embers.Embers;
 import com.rekindled.embers.api.augment.AugmentUtil;
 import com.rekindled.embers.datagen.EmbersItemTags;
 import com.rekindled.embers.util.Misc;
@@ -51,15 +54,30 @@ public class AnvilBreakdownRecipe implements IDawnstoneAnvilRecipe, IVisuallySpl
 	@Override
 	public List<IDawnstoneAnvilRecipe> getVisualRecipes() {
 		visualRecipes.clear();
+		// grouped by the material that comes back out, so the tool slot cycles instead of one entry per item
+		Map<String, List<ItemStack>> brokenToolsByOutput = new LinkedHashMap<>();
+		Map<String, ItemStack> outputs = new LinkedHashMap<>();
 		for (Holder<Item> holder : BuiltInRegistries.ITEM.asHolderIdMap()) {
-			Ingredient repairMaterial = Misc.getRepairIngredient(holder.value());
-			ItemStack toolStack = new ItemStack(holder.value());
-			if (!repairMaterial.isEmpty() && toolStack.isDamageableItem() && !blacklist.test(toolStack)) {
+			try {
+				ItemStack toolStack = new ItemStack(holder.value());
+				if (!toolStack.isDamageableItem() || blacklist.test(toolStack))
+					continue;
+				Ingredient repairMaterial = Misc.getRepairIngredient(holder.value());
+				if (repairMaterial.isEmpty())
+					continue;
 				ItemStack brokenTool = toolStack.copy();
 				brokenTool.setDamageValue(brokenTool.getMaxDamage() / 2);
-				visualRecipes.add(new AnvilDisplayRecipe(id, List.of(Misc.getPreferredItem(repairMaterial.getItems())), List.of(brokenTool), Ingredient.EMPTY));
+				ItemStack output = Misc.getPreferredItem(repairMaterial.getItems());
+				String key = BuiltInRegistries.ITEM.getKey(output.getItem()).toString();
+				outputs.putIfAbsent(key, output);
+				brokenToolsByOutput.computeIfAbsent(key, k -> new ArrayList<>()).add(brokenTool);
+			} catch (Exception e) {
+				// a single misbehaving item must not cost every other breakdown display
+				Embers.LOGGER.error("Skipping dawnstone anvil breakdown display for " + holder.value(), e);
 			}
 		}
+		for (Map.Entry<String, List<ItemStack>> entry : brokenToolsByOutput.entrySet())
+			visualRecipes.add(new AnvilDisplayRecipe(id, List.of(outputs.get(entry.getKey())), entry.getValue(), Ingredient.EMPTY));
 		return visualRecipes;
 	}
 

@@ -1,11 +1,15 @@
 package com.rekindled.embers.recipe;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonObject;
+import com.rekindled.embers.Embers;
 import com.rekindled.embers.datagen.EmbersItemTags;
 import com.rekindled.embers.util.Misc;
 
@@ -49,16 +53,53 @@ public class AnvilRepairRecipe implements IDawnstoneAnvilRecipe, IVisuallySplitR
 	@Override
 	public List<IDawnstoneAnvilRecipe> getVisualRecipes() {
 		visualRecipes.clear();
+		// one display recipe per repair material, with the tool slots cycling through the group,
+		// instead of one entry per repairable item
+		Map<String, RepairGroup> groups = new LinkedHashMap<>();
 		for (Holder<Item> holder : BuiltInRegistries.ITEM.asHolderIdMap()) {
-			Ingredient repairMaterial = Misc.getRepairIngredient(holder.value());
-			ItemStack toolStack = new ItemStack(holder.value());
-			if (!repairMaterial.isEmpty() && toolStack.isDamageableItem() && !blacklist.test(toolStack)) {
+			try {
+				ItemStack toolStack = new ItemStack(holder.value());
+				if (!toolStack.isDamageableItem() || blacklist.test(toolStack))
+					continue;
+				Ingredient repairMaterial = Misc.getRepairIngredient(holder.value());
+				if (repairMaterial.isEmpty())
+					continue;
 				ItemStack brokenTool = toolStack.copy();
 				brokenTool.setDamageValue(brokenTool.getMaxDamage() / 2);
-				visualRecipes.add(new AnvilDisplayRecipe(id, List.of(toolStack), List.of(brokenTool), repairMaterial));
+				groups.computeIfAbsent(materialKey(repairMaterial), key -> new RepairGroup(repairMaterial))
+						.add(toolStack, brokenTool);
+			} catch (Exception e) {
+				// a single misbehaving item must not cost every other repair recipe
+				Embers.LOGGER.error("Skipping dawnstone anvil repair display for " + holder.value(), e);
 			}
 		}
+		for (RepairGroup group : groups.values())
+			visualRecipes.add(new AnvilDisplayRecipe(id, group.tools, group.brokenTools, group.material));
 		return visualRecipes;
+	}
+
+	/** Items repaired by the same thing share a display, so they are grouped by what repairs them. */
+	private static String materialKey(Ingredient ingredient) {
+		List<String> items = new ArrayList<>();
+		for (ItemStack stack : ingredient.getItems())
+			items.add(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString());
+		Collections.sort(items);
+		return String.join(",", items);
+	}
+
+	private static class RepairGroup {
+		final Ingredient material;
+		final List<ItemStack> tools = new ArrayList<>();
+		final List<ItemStack> brokenTools = new ArrayList<>();
+
+		RepairGroup(Ingredient material) {
+			this.material = material;
+		}
+
+		void add(ItemStack tool, ItemStack brokenTool) {
+			tools.add(tool);
+			brokenTools.add(brokenTool);
+		}
 	}
 
 	@Override
