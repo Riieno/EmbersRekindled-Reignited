@@ -19,8 +19,12 @@ import net.neoforged.neoforge.common.crafting.CompoundIngredient;
 /** EMI port of the AlchemyCategory. */
 public class AlchemyEmiRecipe implements EmiRecipe {
 
-	private static final int VERTICAL_MARGIN = 2;
-	private static final int PALETTE_Y = 96;
+	private static final int RING_RADIUS = 27;
+	private static final int RING_RADIUS_SPACIOUS = 30;
+	private static final int ASPECT_GAP = 16;
+	private static final int PALETTE_Y = 90;
+	private static final int SLOT_SIZE = 16;
+	private static final int MARGIN = 2;
 
 	private final EmbersEmiCategory category;
 	private final ResourceLocation id;
@@ -97,25 +101,39 @@ public class AlchemyEmiRecipe implements EmiRecipe {
 
 	@Override
 	public int getDisplayHeight() {
-		return category.getHeight();
+		if (aspectPalette.isEmpty())
+			return centerY() + ringRadius() + ASPECT_GAP + SLOT_SIZE + MARGIN;
+		return PALETTE_Y + SLOT_SIZE + MARGIN;
+	}
+
+	private int ringRadius() {
+		return aspectPalette.isEmpty() ? RING_RADIUS_SPACIOUS : RING_RADIUS;
+	}
+
+	private int centerY() {
+		return MARGIN + ringRadius();
+	}
+
+	private int aspectY() {
+		return centerY() + ASPECT_GAP;
 	}
 
 	@Override
 	public void addWidgets(WidgetHolder widgets) {
-		int yOffset = VERTICAL_MARGIN;
-		category.drawBackground(widgets, yOffset);
+		int yOffset = 0;
+		category.drawBackground(widgets, yOffset, getDisplayHeight());
 		EmiIngredients.addSlot(widgets, inputs.get(0), 32, 37 + yOffset);
 		EmiIngredients.addSlot(widgets, getOutputs().get(0), 101, 37 + yOffset).recipeContext(this);
 
-		Vec3 center = new Vec3(0, 30, 0);
+		Vec3 center = new Vec3(0, ringRadius(), 0);
 		int ringInputs = ringAspects.size();
 		for (int i = 0; i < ringInputs; i++) {
 			Vec3 rotated = center.zRot((float) (i * 2.0 * Math.PI / ringInputs));
 			int x = (int) (32 + rotated.x());
-			int y = (int) (29 + rotated.y() + yOffset);
+			int y = (int) (centerY() + rotated.y() + yOffset);
 			EmiIngredients.addSlot(widgets, inputs.get(i + 1), x, y);
-			widgets.addTexture(EMIPlugin.ALCHEMY_PILLAR_TEXTURE, x, (int) (45 + rotated.y() + yOffset), 16, 16, 126, 0);
-			EmiIngredients.addSlot(widgets, ringAspects.get(i), x, (int) (45 + rotated.y() + yOffset)).drawBack(false);
+			widgets.addTexture(EMIPlugin.ALCHEMY_PILLAR_TEXTURE, x, (int) (aspectY() + rotated.y() + yOffset), 16, 16, 126, 0);
+			EmiIngredients.addSlot(widgets, ringAspects.get(i), x, (int) (aspectY() + rotated.y() + yOffset)).drawBack(false);
 		}
 		for (int i = 0; i < aspectPalette.size(); i++)
 			EmiIngredients.addSlot(widgets, aspectPalette.get(i), 63 - 8 * aspectPalette.size() + 16 * i, PALETTE_Y + yOffset);

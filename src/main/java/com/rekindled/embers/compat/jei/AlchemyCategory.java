@@ -31,8 +31,17 @@ public class AlchemyCategory implements IRecipeCategory<IAlchemyRecipe> {
 	public static ResourceLocation texture = ResourceLocation.fromNamespaceAndPath(Embers.MODID, "textures/gui/jei_alchemy.png");
 	public static ResourceLocation pillarTexture = ResourceLocation.fromNamespaceAndPath(Embers.MODID, "textures/gui/jei_alchemy.png");
 
+	private final int ringRadius;
+	private final int ringCenterY;
+	private final int aspectY;
+
 	public AlchemyCategory(IGuiHelper helper) {
-		background = helper.createDrawable(texture, 0, 0, 126, 116);
+		boolean randomizeAspectus = ConfigManager.randomizeAlchemyAspectus();
+		ringRadius = randomizeAspectus ? 27 : 30;
+		ringCenterY = 2 + ringRadius;
+		aspectY = ringCenterY + 16;
+		int height = randomizeAspectus ? 108 : ringCenterY + ringRadius + 16 + 16 + 2;
+		background = helper.createDrawable(texture, 0, 0, 126, height);
 		pillar = helper.createDrawable(pillarTexture, 126, 0, 16, 16);
 		icon = helper.createDrawableIngredient(VanillaTypes.ITEM_STACK, new ItemStack(RegistryManager.ALCHEMY_TABLET_ITEM.get()));
 	}
@@ -61,7 +70,7 @@ public class AlchemyCategory implements IRecipeCategory<IAlchemyRecipe> {
 	public void setRecipe(IRecipeLayoutBuilder builder, IAlchemyRecipe recipe, IFocusGroup focuses) {
 		builder.addSlot(RecipeIngredientRole.INPUT, 32, 37).addIngredients(recipe.getCenterInput());
 		builder.addSlot(RecipeIngredientRole.OUTPUT, 101, 37).addItemStack(recipe.getResultItem());
-		Vec3 center = new Vec3(0, 30, 0);
+		Vec3 center = new Vec3(0, ringRadius, 0);
 
 		int aspecti = recipe.getAspects().size();
 		int inputs = recipe.getInputs().size();
@@ -80,14 +89,14 @@ public class AlchemyCategory implements IRecipeCategory<IAlchemyRecipe> {
 
 		for (int i = 0; i < inputs; i++) {
 			Vec3 rotated = center.zRot((float) (i * 2.0 * Math.PI / recipe.getInputs().size()));
-			builder.addSlot(RecipeIngredientRole.INPUT, (int) (32 + rotated.x()), (int) (29 + rotated.y())).addIngredients(recipe.getInputs().get(i));
+			builder.addSlot(RecipeIngredientRole.INPUT, (int) (32 + rotated.x()), (int) (ringCenterY + rotated.y())).addIngredients(recipe.getInputs().get(i));
 
 			Ingredient aspectus = randomizeAspectus ? CompoundIngredient.of(aspectusCombinations[i]) : exactAspectus.get(i);
-			builder.addSlot(RecipeIngredientRole.CATALYST, (int) (32 + rotated.x()), (int) (45 + rotated.y())).addIngredients(aspectus).setBackground(pillar, 0, 0);
+			builder.addSlot(RecipeIngredientRole.CATALYST, (int) (32 + rotated.x()), (int) (aspectY + rotated.y())).addIngredients(aspectus).setBackground(pillar, 0, 0);
 		}
 		if (randomizeAspectus) {
 			for (int i = 0; i < aspecti; i++) {
-				builder.addSlot(RecipeIngredientRole.CATALYST, 63 - 8 * recipe.getAspects().size() + 16 * i, 96).addIngredients(recipe.getAspects().get(i));
+				builder.addSlot(RecipeIngredientRole.CATALYST, 63 - 8 * recipe.getAspects().size() + 16 * i, 90).addIngredients(recipe.getAspects().get(i));
 			}
 		}
 	}
