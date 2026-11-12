@@ -50,8 +50,12 @@ public class EmbersEmiCategory extends EmiRecipeCategory {
 	}
 
 	public void drawBackground(WidgetHolder widgets) {
+		drawBackground(widgets, 0);
+	}
+
+	public void drawBackground(WidgetHolder widgets, int yOffset) {
 		if (texture != null)
-			widgets.addTexture(texture, 0, 0, width, height, textureU, textureV);
+			widgets.addTexture(texture, 0, yOffset, width, height, textureU, textureV);
 	}
 
 	public static ResourceLocation guiTexture(String name) {

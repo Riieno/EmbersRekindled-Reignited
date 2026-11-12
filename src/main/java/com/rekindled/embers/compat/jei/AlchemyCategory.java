@@ -32,7 +32,7 @@ public class AlchemyCategory implements IRecipeCategory<IAlchemyRecipe> {
 	public static ResourceLocation pillarTexture = ResourceLocation.fromNamespaceAndPath(Embers.MODID, "textures/gui/jei_alchemy.png");
 
 	public AlchemyCategory(IGuiHelper helper) {
-		background = helper.createDrawable(texture, 0, 0, 126, 108);
+		background = helper.createDrawable(texture, 0, 0, 126, 116);
 		pillar = helper.createDrawable(pillarTexture, 126, 0, 16, 16);
 		icon = helper.createDrawableIngredient(VanillaTypes.ITEM_STACK, new ItemStack(RegistryManager.ALCHEMY_TABLET_ITEM.get()));
 	}
@@ -87,7 +87,7 @@ public class AlchemyCategory implements IRecipeCategory<IAlchemyRecipe> {
 		}
 		if (randomizeAspectus) {
 			for (int i = 0; i < aspecti; i++) {
-				builder.addSlot(RecipeIngredientRole.CATALYST, 63 - 8 * recipe.getAspects().size() + 16 * i, 90).addIngredients(recipe.getAspects().get(i));
+				builder.addSlot(RecipeIngredientRole.CATALYST, 63 - 8 * recipe.getAspects().size() + 16 * i, 96).addIngredients(recipe.getAspects().get(i));
 			}
 		}
 	}
