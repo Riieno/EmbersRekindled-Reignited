@@ -41,7 +41,7 @@ public final class EmiIngredients {
 			if (!stack.isEmpty())
 				parts.add(EmiStack.of(stack));
 		}
-		return EmiIngredient.of(parts);
+		return listed(parts, 1);
 	}
 
 	public static EmiIngredient ingredient(Ingredient ingredient) {
@@ -72,7 +72,19 @@ public final class EmiIngredients {
 			if (!stack.isEmpty())
 				parts.add(NeoForgeEmiStack.of(stack));
 		}
-		return EmiIngredient.of(parts, amount);
+		return listed(parts, amount);
+	}
+
+	/** Keeps every entry cyclable; EmiIngredient.of() would fold tag-covered lists into a single static icon. */
+	private static EmiIngredient listed(List<EmiIngredient> parts, long amount) {
+		if (parts.isEmpty())
+			return EmiStack.EMPTY;
+		if (parts.size() == 1)
+			return parts.get(0);
+		List<EmiStack> stacks = new ArrayList<>(parts.size());
+		for (EmiIngredient part : parts)
+			stacks.addAll(part.getEmiStacks());
+		return new CyclingEmiIngredient(stacks, amount);
 	}
 
 	/** Mirrors the JEI IngotTooltipCallback; EMI already shows the fluid amount itself. */
