@@ -1,6 +1,7 @@
 package com.rekindled.embers.compat.jei;
 
 import com.rekindled.embers.Embers;
+import com.rekindled.embers.compat.WorldInteractionRecipe;
 import com.rekindled.embers.RegistryManager;
 
 import mezz.jei.api.constants.VanillaTypes;

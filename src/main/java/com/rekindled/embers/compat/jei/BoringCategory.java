@@ -97,7 +97,7 @@ public class BoringCategory implements IRecipeCategory<IBoringRecipe> {
 	@Override
 	public void draw(IBoringRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
 		Font fontRenderer = Minecraft.getInstance().font;
-		Misc.drawComponents(fontRenderer, guiGraphics, 28, 10, Component.translatable(Embers.MODID + ".jei.recipe.boring.weight", recipe.getDisplayOutput().getWeight()));
+		Misc.drawComponents(fontRenderer, guiGraphics, 28, 10, Component.translatable(Embers.MODID + ".jei.recipe.boring.weight", recipe.getDisplayOutput().getWeight().asInt()));
 		Misc.drawComponents(fontRenderer, guiGraphics, 28, 30, Component.translatable(Embers.MODID + ".jei.recipe.boring.required_blocks"));
 		List<Component> text = new ArrayList<Component>();
 		if (recipe.getMinHeight() != Integer.MIN_VALUE)

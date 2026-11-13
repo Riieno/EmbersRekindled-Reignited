@@ -6,6 +6,7 @@ import java.util.List;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonObject;
+import com.rekindled.embers.Embers;
 import com.rekindled.embers.api.augment.AugmentUtil;
 import com.rekindled.embers.api.augment.IAugment;
 
@@ -77,15 +78,25 @@ public class AnvilAugmentRecipe implements IDawnstoneAnvilRecipe, IVisuallySplit
 	@Override
 	public List<IDawnstoneAnvilRecipe> getVisualRecipes() {
 		visualRecipes.clear();
+		// one display whose tool slot cycles the whole ingredient, rather than one entry per tool
+		List<ItemStack> leveledTools = new ArrayList<>();
+		List<ItemStack> augmentedTools = new ArrayList<>();
 		for (ItemStack stack : tool.getItems()) {
-			ItemStack leveledTool = stack.copy();
-			if (augment.countTowardsTotalLevel()) {
-				AugmentUtil.setLevel(leveledTool, AugmentUtil.getLevel(leveledTool) + 1);
+			try {
+				ItemStack leveledTool = stack.copy();
+				if (augment.countTowardsTotalLevel()) {
+					AugmentUtil.setLevel(leveledTool, AugmentUtil.getLevel(leveledTool) + 1);
+				}
+				ItemStack augmentedTool = leveledTool.copy();
+				AugmentUtil.addAugment(augmentedTool, ItemStack.EMPTY, augment);
+				leveledTools.add(leveledTool);
+				augmentedTools.add(augmentedTool);
+			} catch (Exception e) {
+				Embers.LOGGER.error("Skipping dawnstone anvil augment display for " + stack, e);
 			}
-			ItemStack augmentedTool = leveledTool.copy();
-			AugmentUtil.addAugment(augmentedTool, ItemStack.EMPTY, augment);
-			visualRecipes.add(new AnvilDisplayRecipe(id, List.of(augmentedTool), List.of(leveledTool), input));
 		}
+		if (!leveledTools.isEmpty())
+			visualRecipes.add(new AnvilDisplayRecipe(id, augmentedTools, leveledTools, input));
 		return visualRecipes;
 	}
 

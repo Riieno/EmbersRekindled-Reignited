@@ -52,9 +52,18 @@ repositories {
         name = 'Modrinth'
         url = 'https://api.modrinth.com/maven'
     }
+    maven {
+        name = 'TerraformersMC'
+        url = 'https://maven.terraformersmc.com/releases/'
+    }
 }
 
-def referenceLibs = fileTree('E:/create-thrusters/libs') {
+def referenceLibsDir = new File('E:/create-thrusters/libs')
+if (!referenceLibsDir.isDirectory()) {
+    referenceLibsDir = file('libs')
+}
+
+def referenceLibs = fileTree(referenceLibsDir) {
     include '*.jar'
     exclude 'sable-neoforge-1.21.1-1.2.2.jar'
 }
@@ -100,8 +109,39 @@ dependencies {
     compileOnly "maven.modrinth:sable:2.0.3+mc1.21.1"
     compileOnly "dev.engine-room.flywheel:flywheel-neoforge-api-${minecraft_version}:1.0.6"
     compileOnly "mezz.jei:jei-1.21.1-neoforge-api:${jei_version}"
+    compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
     compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
     compileOnly "maven.modrinth:jade:${jade_version}"
+}
+
+// Recipe viewer for dev runs, from gradle.properties (default jei) or EMBERS_VIEWER_COMPAT.
+// The jars are runtime-only: they never reach the built mod.
+def viewerCompat = (System.getenv('EMBERS_VIEWER_COMPAT') ?: project.findProperty('viewerCompat') ?: 'jei').toString().toLowerCase()
+if (!(viewerCompat in ['jei', 'emi', 'both', 'none'])) {
+    logger.warn("Unknown viewerCompat '{}', using jei", viewerCompat)
+    viewerCompat = 'jei'
+}
+if (viewerCompat != 'none') {
+    dependencies {
+        // jarjar copies stay out; Create and Sable bring their own nested libraries
+        runtimeOnly fileTree(referenceLibsDir) {
+            include '*.jar'
+            exclude 'ponder-*', 'Catnip-*', 'sable-companion-*'
+        }
+        runtimeOnly "maven.modrinth:sable:2.0.3+mc1.21.1"
+        runtimeOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
+        runtimeOnly "maven.modrinth:jade:${jade_version}"
+    }
+    if (viewerCompat == 'jei' || viewerCompat == 'both') {
+        dependencies {
+            runtimeOnly "mezz.jei:jei-1.21.1-neoforge:${jei_version}"
+        }
+    }
+    if (viewerCompat == 'emi' || viewerCompat == 'both') {
+        dependencies {
+            runtimeOnly "dev.emi:emi-neoforge:${emi_version}"
+        }
+    }
 }
 
 def replaceProperties = [
